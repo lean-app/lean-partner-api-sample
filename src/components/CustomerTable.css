@@ -1,0 +1,11 @@
+.customer-table-item {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+}
+
+.customer-table-item-actions {
+    display: flex;
+    justify-content: flex-end;
+}
