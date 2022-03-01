@@ -1,8 +1,8 @@
 import Button from 'react-bootstrap/Button';
-import { perform } from '../services/workers.service';
+import WorkerService from '../services/workers.service';
 
-const createWorker = (cb: Function) => () => perform({ 
-    type: 'CREATE_WORKER', 
+const createWorker = (cb: Function) => () => WorkerService.perform({ 
+    type: 'CreateWorker', 
     params: {
         worker: { }
     }

@@ -27,3 +27,9 @@ export const getWorkers = ({ throwError, error }: { throwError?: boolean, error?
 }, 100 * Math.random()));
 
 export const getWorker = async (partnerUserId: string) => customerData.filter(({ id }) => id === partnerUserId);
+
+type Worker = { [key: string]: any };
+export const createWorker = ({ worker }: { worker: Worker }) => {
+    console.log(worker);   
+    return { };
+};

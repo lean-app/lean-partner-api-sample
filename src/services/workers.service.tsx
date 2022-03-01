@@ -29,12 +29,12 @@ export interface Result {
     error?: any
 };
 
-export const perform = async ({ type, params, options }: APIAction, cb?: Function): Promise<Result> => {
+const perform = async ({ type, params, options }: APIAction, cb?: Function): Promise<Result> => {
   const { log = false, logger = defaultLogger } = options ?? { };
   const handler: Function = handlers[type];
 
   try {
-    const data = await handler?.(params);
+    const data = await handler(params);
     const result = { data };
 
     if (log) {
@@ -55,4 +55,8 @@ export const perform = async ({ type, params, options }: APIAction, cb?: Functio
     cb?.(result);  
     return result;
   }
+};
+
+export default {
+    perform
 };

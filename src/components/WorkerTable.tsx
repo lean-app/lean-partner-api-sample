@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { useDidMount } from '../hooks/lifecycle';
 
-import { GET_WORKERS, perform } from '../services/workers.service';
+import WorkerService, { GET_WORKERS } from '../services/workers.service';
 import { Table } from './Table';
 
 const headerCellDefs = [
@@ -55,7 +55,7 @@ const toRowDefs = ({ name, id, paymentMethod }: any) => ({ id,
     ] 
 });
 
-const getWorkers = (cb: Function) => perform({ type: GET_WORKERS }, cb);
+const getWorkers = (cb: Function) => WorkerService.perform({ type: GET_WORKERS }, cb);
 export const WorkerTable = () => {
     const [ workerData, setWorkerData ] = useState([]);
 
