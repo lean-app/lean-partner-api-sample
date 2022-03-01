@@ -26,4 +26,4 @@ export const getWorkers = ({ throwError, error }: { throwError?: boolean, error?
     return resolve(cloneDeep(customerData));
 }, 100 * Math.random()));
 
-export const getWorker = async (partnerUserId: string) => await fetch(partnerApi('/customer', partnerUserId));
+export const getWorker = async (partnerUserId: string) => customerData.filter(({ id }) => id === partnerUserId);
