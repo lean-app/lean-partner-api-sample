@@ -4,7 +4,7 @@ const customerData = [
     {
         name: 'Nolan Sykes',
         id: '1',
-        paymentMethod: 'lean',
+        paymentMethod: 'bank_account',
     },
     {
         name: 'Zach Jobe',

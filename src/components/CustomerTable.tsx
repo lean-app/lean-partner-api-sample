@@ -73,19 +73,13 @@ const toRow = ({ id, cellDefs }: any) => (
     </ListGroup.Item>
 );
 
+const getWorkers = (cb: Function) => perform({ type: GET_WORKERS }, cb);
+
 export const CustomerTable = () => {
     const [ customerData, setCustomerData ] = useState([]);
 
     useDidMount(() => {
-        console.log('didMount');
-        const action = {
-            type: GET_WORKERS
-        };
-
-        perform(action, (data: any) => { 
-            console.log(data); 
-            setCustomerData(data); 
-        });
+        perform({ type: GET_WORKERS }, (data: any) => setCustomerData(data));
     });
 
     let customerCells: JSX.Element[] = [];
@@ -93,6 +87,8 @@ export const CustomerTable = () => {
         customerCells = customerData
             .map(toRowDefs)
             .map(toRow);
+    } else {
+        getWorkers((data: any) => setCustomerData(data));
     }
 
     return (
