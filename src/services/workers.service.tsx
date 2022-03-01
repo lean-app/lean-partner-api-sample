@@ -1,4 +1,4 @@
-import { getWorkers, getWorker } from "./workers.api";
+import { getWorkers, getWorker } from "./workers/api";
 
 export const GET_WORKERS = 'GetWorkers';
 export const GET_WORKER = 'GetWorker';
@@ -22,7 +22,12 @@ export interface APIAction {
     options?: { [key: string]: any }
 };
 
-export const perform = async ({ type, params, options }: APIAction, cb?: Function): Promise<{ data?: any, error?: Error }> => {
+export interface Result {
+    data?: any,
+    error?: any
+};
+
+export const perform = async ({ type, params, options }: APIAction, cb?: Function): Promise<Result> => {
   const { log = false, logger = defaultLogger } = options ?? { };
   const handler: Function = handlers[type];
 

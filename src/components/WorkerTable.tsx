@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { useDidMount } from '../hooks/lifecycle';
 
-import { GET_WORKERS, perform } from '../shared/worker.service';
-
-import './CustomerTable.css';
+import { GET_WORKERS, perform } from '../services/workers.service';
+import { Table } from './Table';
 
 const headerCellDefs = [
     {
@@ -32,14 +30,6 @@ const headerCellDefs = [
     }
 ];
 
-const toRowCell = ({ key, content, width }: any) => {
-    let style = [{ label: 'width', value: width }]
-        .filter(({ value }) => value)
-        .reduce((styles, styleDef) => ({ ...styles, [styleDef.label]: styleDef.value }), {});
-
-    return <div style={style} key={key}>{content}</div>
-};
-
 const toRowDefs = ({ name, id, paymentMethod }: any) => ({ id, 
     cellDefs: [
         {
@@ -57,7 +47,7 @@ const toRowDefs = ({ name, id, paymentMethod }: any) => ({ id,
         },{
             key: `${id}-actions`,
             width: '20%',
-            content: <div className="customer-table-item-actions">
+            content: <div className="worker-table-item-actions">
                 {paymentMethod === 'lean' && <Button>Invite</Button>}
                 <Button>Delivery</Button>
             </div>
@@ -65,40 +55,21 @@ const toRowDefs = ({ name, id, paymentMethod }: any) => ({ id,
     ] 
 });
 
-const toRow = ({ id, cellDefs }: any) => (
-    <ListGroup.Item key={id}>
-        <div className="customer-table-item">
-            {cellDefs.map(toRowCell)}
-        </div>
-    </ListGroup.Item>
-);
-
 const getWorkers = (cb: Function) => perform({ type: GET_WORKERS }, cb);
-
-export const CustomerTable = () => {
-    const [ customerData, setCustomerData ] = useState([]);
+export const WorkerTable = () => {
+    const [ workerData, setWorkerData ] = useState([]);
 
     useDidMount(() => {
-        perform({ type: GET_WORKERS }, (data: any) => setCustomerData(data));
+        getWorkers((data: any) => setWorkerData(data));
     });
 
-    let customerCells: JSX.Element[] = [];
-    if (Array.isArray(customerData)) {
-        customerCells = customerData
-            .map(toRowDefs)
-            .map(toRow);
+    let workerCells: any[] = [];
+    if (Array.isArray(workerData)) {
+        workerCells = workerData
+            .map(toRowDefs);
     } else {
-        getWorkers((data: any) => setCustomerData(data));
+        getWorkers((data: any) => setWorkerData(data));
     }
 
-    return (
-    <Card>
-        <Card.Body>
-            <ListGroup as="ul">
-                {toRow({ id: 'header', cellDefs: headerCellDefs })}
-                {customerCells}
-            </ListGroup>
-        </Card.Body>
-    </Card>
-    );
+    return <Table header={{ cells: headerCellDefs }} rows={workerCells} />;
 }

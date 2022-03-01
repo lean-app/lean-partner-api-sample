@@ -1,11 +1,12 @@
-import { CustomerTable } from "../components/CustomerTable"
-
+import { WorkerTable } from "../components/WorkerTable"
+import { WorkerActionBar } from "../components/WorkerActionBar"
 export const Home = () => {
     return (
         <>
         <div className="partner-app-menu"></div>
-        <div className="customer-table">
-            <CustomerTable />
+        <div className="worker-table">
+            <WorkerTable />
+            <WorkerActionBar />
         </div>
         </>
     )
