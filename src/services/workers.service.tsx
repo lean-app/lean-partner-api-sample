@@ -1,11 +1,13 @@
-import { getWorkers, getWorker } from "./workers/api";
+import { getWorkers, getWorker, createWorker } from "./workers/api";
 
 export const GET_WORKERS = 'GetWorkers';
 export const GET_WORKER = 'GetWorker';
+export const CREATE_WORKER = 'CreateWorker';
 
 const handlers: { [key: string]: Function } = {
     [GET_WORKERS]: getWorkers,
     [GET_WORKER]: getWorker,
+    [CREATE_WORKER]: createWorker,
 };
 
 const logHandler = (data: any, logger: any ) => {
@@ -33,13 +35,14 @@ export const perform = async ({ type, params, options }: APIAction, cb?: Functio
 
   try {
     const data = await handler?.(params);
+    const result = { data };
 
     if (log) {
-        logHandler(data, logger.next);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+        logHandler(result, logger.next);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
     }
 
-    cb?.(data)
-    return { data };
+    cb?.(result);
+    return result;
   } catch (error: any) {
     const result = { 
         error: error instanceof Error ? error : new Error(error)

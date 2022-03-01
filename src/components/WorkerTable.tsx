@@ -60,7 +60,7 @@ export const WorkerTable = () => {
     const [ workerData, setWorkerData ] = useState([]);
 
     useDidMount(() => {
-        getWorkers((data: any) => setWorkerData(data));
+        getWorkers(({ data }: any) => setWorkerData(data));
     });
 
     let workerCells: any[] = [];
