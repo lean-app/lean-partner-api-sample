@@ -21,17 +21,17 @@ const start = async function() {
   try {
     await server.register(H2o2);
     await server.register(Inert);
-    await server.register(Log);
+    // await server.register(Log);
 
     server.route({
         method: '*',
-        path: '/api/{endpoint*}',
+        path: '/proxy/{endpoint*}',
         handler: {
             proxy: {
-                host: `app.staging.withlean.com`,
-                port: '443',
-                protocol: 'https',
-                passThrough: true
+                host: `localhost`,
+                port: '3000',
+                protocol: 'http',
+                passThrough: true,
             }
         }
     });
@@ -43,7 +43,7 @@ const start = async function() {
         handler: {
             proxy: {
                 host: 'localhost',
-                port: '3000',
+                port: '3001',
                 protocol: 'http',
                 passThrough: true
             }

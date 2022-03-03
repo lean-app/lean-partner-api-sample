@@ -1,6 +1,6 @@
 import { apiKey } from '../../apiKey';
 
-const API_ENDPOINT = 'http://localhost:8000/api';
+const API_ENDPOINT = 'http://localhost:8000/proxy/api';
 const partnerApi = (path: string) => `${API_ENDPOINT}/${path}`;
 
 export { getWorkers } from './api.mock';
@@ -13,7 +13,7 @@ export const createWorker = ({ worker }: {
     method: 'POST',
     body: JSON.stringify(worker),
     headers: {
-        'Authorization': `${apiKey}`
+        authorization: `${apiKey}:`
     },
     mode: 'cors',
     credentials: 'include',
