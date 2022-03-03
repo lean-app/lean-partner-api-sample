@@ -10,13 +10,10 @@ const handlers: { [key: string]: Function } = {
     [CREATE_WORKER]: createWorker,
 };
 
-const logHandler = (data: any, logger: any ) => {
-    if (typeof logger === 'function') {
-        logger(`WorkerService: ${data}`);
-    }
+const defaultLogger = { 
+    next: (value: any) => console.log(value), 
+    error: (value: any) => console.error(value) 
 };
-
-const defaultLogger = { next: console.log, error: console.error };
 
 export interface APIAction { 
     type: string, 
@@ -30,7 +27,13 @@ export interface Result {
 };
 
 const perform = async ({ type, params, options }: APIAction, cb?: Function): Promise<Result> => {
-  const { log = false, logger = defaultLogger } = options ?? { };
+  const { log = true, logger: userLogger = defaultLogger } = options ?? { };
+  const logger = {
+      next: undefined,
+      error: undefined,
+      ...userLogger
+  };
+
   const handler: Function = handlers[type];
 
   try {
@@ -38,21 +41,21 @@ const perform = async ({ type, params, options }: APIAction, cb?: Function): Pro
     const result = { data };
 
     if (log) {
-        logHandler(result, logger.next);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+        logger.next?.(result);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
     }
 
     cb?.(result);
     return result;
-  } catch (error: any) {
-    const result = { 
-        error: error instanceof Error ? error : new Error(error)
-    };
+  } catch (e: any) {
+    const error = e instanceof Error ? e : new Error(e);
 
     if (log) {
-        logHandler(result, logger.error);
+        logger.error?.({ type, params, error });
     }
 
+    const result = { error };
     cb?.(result);  
+    
     return result;
   }
 };

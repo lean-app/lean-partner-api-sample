@@ -1,7 +1,7 @@
 import Button from 'react-bootstrap/Button';
 import WorkerService from '../services/workers.service';
 
-const createWorker = (cb: Function) => () => WorkerService.perform({ 
+const createWorker = (cb?: Function) => () => WorkerService.perform({ 
     type: 'CreateWorker', 
     params: {
         worker: { }
@@ -10,6 +10,6 @@ const createWorker = (cb: Function) => () => WorkerService.perform({
 
 export const WorkerActionBar = () => {
     return <div>
-        <Button onClick={createWorker((result: any) => console.log(result))}>Create Worker</Button>
+        <Button onClick={createWorker()}>Create Worker</Button>
     </div>
 }
