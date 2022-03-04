@@ -1,1 +1,1 @@
-export const handler = ({ requestContext, }: any) => ({ statusCode: 200, body: JSON.stringify(requestContext) });
+export const handler = async ({ requestContext, }: any) => ({ statusCode: 200, body: JSON.stringify(requestContext) });
