@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 import { apiKey } from '../../apiKey';
 import { EmailAddress } from '../../types/email.types';
 import { Worker } from '../../types/worker.types';
@@ -8,12 +6,7 @@ const API_ENDPOINT = 'http://localhost:8000/proxy/api';
 const partnerApi = (path: string) => `${API_ENDPOINT}/${path}`;
 
 export { getWorkers } from './api.mock';
-export const getWorker = ({ partnerUserId }: { partnerUserId: string }) => fetch(partnerApi(`customer/${partnerUserId}`), {
-    method: 'GET',
-    headers: {
-        authorization: `${apiKey}:`
-    }
-}).then((response) => response.json());
+export const getWorker = ({ partnerUserId }: { partnerUserId: string }) => fetch(partnerApi(`customer/${partnerUserId}`));
 
 export interface CreateWorkerProps {
     firstName: string,
@@ -39,5 +32,7 @@ export const createWorker = ({ worker }: {
     body: JSON.stringify(worker),
     headers: {
         authorization: `${apiKey}:`
-    }
+    },
+    mode: 'cors',
+    credentials: 'include',
 }).then((response) => response.json());
