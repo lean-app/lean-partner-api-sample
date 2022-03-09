@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import Button from 'react-bootstrap/Button';
-import ListGroup from 'react-bootstrap/ListGroup';
+import { ulid } from 'ulid';
 import { useDidMount } from '../hooks/lifecycle';
 
-import WorkerService, { GET_WORKERS } from '../services/workers.service';
+import WorkerService, { GET_WORKERS, INVITE_WORKER } from '../services/workers.service';
 import { Table } from './Table';
 
 const headerCellDefs = [
@@ -48,27 +48,28 @@ const toRowDefs = ({ name, id, paymentMethod }: any) => ({ id,
             key: `${id}-actions`,
             width: '20%',
             content: <div className="worker-table-item-actions">
-                {paymentMethod === 'lean' && <Button>Invite</Button>}
+                {paymentMethod !== 'lean' && <Button onClick={() => WorkerService.perform({ type: INVITE_WORKER, params: {
+                    partnerUserId: id
+                } })}>Invite</Button>}
                 <Button>Delivery</Button>
             </div>
         }
     ] 
 });
 
-const getWorkers = (cb: Function) => WorkerService.perform({ type: GET_WORKERS }, cb);
 export const WorkerTable = () => {
     const [ workerData, setWorkerData ] = useState([]);
 
     useDidMount(() => {
-        getWorkers(({ data }: any) => setWorkerData(data));
+        WorkerService.perform({ type: GET_WORKERS }, ({ data, error }: any) => {
+            data && setWorkerData(data)
+        });
     });
 
     let workerCells: any[] = [];
     if (Array.isArray(workerData)) {
         workerCells = workerData
             .map(toRowDefs);
-    } else {
-        getWorkers((data: any) => setWorkerData(data));
     }
 
     return <Table header={{ cells: headerCellDefs }} rows={workerCells} />;

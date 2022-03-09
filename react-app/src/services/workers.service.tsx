@@ -1,14 +1,29 @@
-import { getWorkers, getWorker, createWorker } from "./workers/api";
+import { apiEndpoint } from '../config';
+
+export const INVITE_WORKER = 'InviteWorker';
 
 export const GET_WORKERS = 'GetWorkers';
 export const GET_WORKER = 'GetWorker';
-export const CREATE_WORKER = 'CreateWorker';
+
+const request = (method: string, path: string, options?: {
+    body?: string
+}) => fetch(`${apiEndpoint}${path}`, {
+    mode: 'cors',
+    ...options,
+    method,
+}).then(response => response.json())
 
 const handlers: { [key: string]: Function } = {
-    [GET_WORKERS]: getWorkers,
-    [GET_WORKER]: getWorker,
-    [CREATE_WORKER]: createWorker,
-};
+    [GET_WORKERS]: () => request('GET', '/workers'),
+    [GET_WORKER]: ({ workerId }: { 
+        workerId: string 
+    }) => request('GET', `/worker/${workerId}`),
+    [INVITE_WORKER]: ({ workerId }: {
+        workerId: string
+    }) => request('POST', `/worker`, {
+        body: JSON.stringify({ workerId })
+    })
+}
 
 const defaultLogger = { 
     next: (value: any) => console.log(value), 
@@ -27,7 +42,7 @@ export interface Result {
 };
 
 const perform = async ({ type, params, options }: APIAction, cb?: Function): Promise<Result> => {
-  const { log = true, logger: userLogger = defaultLogger } = options ?? { };
+  const { log = 'ERROR', logger: userLogger = defaultLogger } = options ?? { };
   const logger = {
       next: undefined,
       error: undefined,
@@ -36,11 +51,16 @@ const perform = async ({ type, params, options }: APIAction, cb?: Function): Pro
 
   const handler: Function = handlers[type];
 
+  if (!handler) {
+      logger.error?.('Handler not implemented.');
+      return { error: 'Handler not implemented.' };
+  }
+
   try {
     const data = await handler(params);
     const result = { data };
 
-    if (log) {
+    if (log === 'ALL') {
         logger.next?.(result);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
     }
 
@@ -49,7 +69,7 @@ const perform = async ({ type, params, options }: APIAction, cb?: Function): Pro
   } catch (e: any) {
     const error = e instanceof Error ? e : new Error(e);
 
-    if (log) {
+    if (log !== 'NONE') {
         logger.error?.({ type, params, error });
     }
 

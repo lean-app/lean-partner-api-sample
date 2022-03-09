@@ -1,2 +1,4 @@
-cdk.out/
+cdk.out
 node_modules
+
+apiKey.ts
