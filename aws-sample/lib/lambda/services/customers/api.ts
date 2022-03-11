@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fetch, { Response } from 'node-fetch';
 
 import { apiKey } from '../../../../apiKey';
 import { EmailAddress } from '../../types/email.types';
@@ -6,6 +6,15 @@ import { Worker } from '../../types/worker.types';
 
 const API_ENDPOINT = 'https://app.staging.withlean.com/api';
 const partnerApi = (path: string) => `${API_ENDPOINT}/${path}`;
+const encodedCredentials = Buffer.from(`${apiKey}:`).toString('base64');
+
+const parseResponse = async (response: Response) => {
+    if (response.status >= 200 && response.status <= 300) {
+        return await response.json();
+    } else {
+        throw new Error(await response.text());
+    }
+};
 
 export { getCustomers } from './api.mock';
 export const getCustomer = ({ partnerUserId }: { 
@@ -13,9 +22,9 @@ export const getCustomer = ({ partnerUserId }: {
 }) =>  fetch(partnerApi(`customer/${partnerUserId}`), {
     method: 'GET',
     headers: {
-        authorization: `${apiKey}:`
+        Authorization: `Basic ${encodedCredentials}`
     }
-}).then((response) => response.json());
+}).then(parseResponse);
 
 export interface CreateCustomerProps {
     firstName: string,
@@ -40,6 +49,6 @@ export const createCustomer = ({ worker }: {
     method: 'POST',
     body: JSON.stringify(worker),
     headers: {
-        authorization: `${apiKey}:`
+        authorization: `Basic ${encodedCredentials}`
     }
-}).then((response) => response.json());
+}).then(parseResponse);

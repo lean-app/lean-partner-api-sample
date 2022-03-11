@@ -28,7 +28,7 @@ export interface Result {
 
 
 const perform = async ({ type, params, options }: APIAction, cb?: Function): Promise<Result> => {
-    const { log = 'ERROR', logger: userLogger = defaultLogger } = options ?? {};
+    const { log = 'ALL', logger: userLogger = defaultLogger } = options ?? {};
     const logger = {
         next: undefined,
         error: undefined,
@@ -47,7 +47,7 @@ const perform = async ({ type, params, options }: APIAction, cb?: Function): Pro
         const result = { data };
 
         if (log === 'ALL') {
-            logger.next?.(result);
+            logger.next?.({ type, params, data });
         }
 
         cb?.(result);
