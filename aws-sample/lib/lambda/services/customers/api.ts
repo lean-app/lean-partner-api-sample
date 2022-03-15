@@ -16,7 +16,13 @@ const parseResponse = async (response: Response) => {
     }
 };
 
-export { getCustomers } from './api.mock';
+export const getCustomers = () => fetch(partnerApi(`customer`), {
+    method: 'GET',
+    headers: {
+        Authorization: `Basic ${encodedCredentials}`
+    }
+}).then(parseResponse);
+
 export const getCustomer = ({ partnerUserId }: { 
     partnerUserId: string 
 }) =>  fetch(partnerApi(`customer/${partnerUserId}`), {

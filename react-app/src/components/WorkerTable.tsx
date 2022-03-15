@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import React from 'react';
+import { ulid } from 'ulid';
+import { useObservable } from '@ngneat/react-rxjs';
 
 import Button from 'react-bootstrap/Button';
-import { ulid } from 'ulid';
 import { useDidMount } from '../hooks/lifecycle';
 
-import WorkerService, { GET_WORKERS, INVITE_WORKER } from '../services/workers.service';
+import Lean, { GET_CUSTOMERS, INVITE_CUSTOMER } from '../services/lean.service';
 import { Table } from './Table';
+
+import WorkerStore from '../stores/worker.store';
+import { selectAllEntities, setEntities } from '@ngneat/elf-entities';
 
 const headerCellDefs = [
     {
@@ -48,7 +52,7 @@ const toRowDefs = ({ name, id, paymentMethod }: any) => ({ id,
             key: `${id}-actions`,
             width: '20%',
             content: <div className="worker-table-item-actions">
-                {paymentMethod !== 'lean' && <Button onClick={() => WorkerService.perform({ type: INVITE_WORKER, params: {
+                {paymentMethod !== 'lean' && <Button onClick={() => Lean.perform({ type: INVITE_CUSTOMER, params: {
                     partnerUserId: id
                 } })}>Invite</Button>}
                 <Button>Delivery</Button>
@@ -58,12 +62,14 @@ const toRowDefs = ({ name, id, paymentMethod }: any) => ({ id,
 });
 
 export const WorkerTable = () => {
-    const [ workerData, setWorkerData ] = useState([]);
+    const [workerData] = useObservable(WorkerStore.pipe(selectAllEntities()));
 
     useDidMount(() => {
-        WorkerService.perform({ type: GET_WORKERS }, ({ data, error }: any) => {
-            data && setWorkerData(data)
-        });
+        WorkerStore.update(setEntities([{
+            id: ulid(),
+            name: 'Zach Jobe',
+            paymentMethod: 'bank_account'
+        }]));
     });
 
     let workerCells: any[] = [];

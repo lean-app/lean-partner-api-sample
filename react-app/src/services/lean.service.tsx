@@ -1,9 +1,9 @@
 import { apiEndpoint } from '../config';
 
-export const INVITE_WORKER = 'InviteWorker';
+export const INVITE_CUSTOMER = 'InviteCustomer';
 
-export const GET_WORKERS = 'GetWorkers';
-export const GET_WORKER = 'GetWorker';
+export const GET_CUSTOMERS = 'GetCustomers';
+export const GET_CUSTOMER = 'GetCustomer';
 
 const request = (method: string, path: string, options?: {
     body?: string
@@ -14,14 +14,14 @@ const request = (method: string, path: string, options?: {
 }).then(response => response.json())
 
 const handlers: { [key: string]: Function } = {
-    [GET_WORKERS]: () => request('GET', '/workers'),
-    [GET_WORKER]: ({ workerId }: { 
-        workerId: string 
-    }) => request('GET', `/worker/${workerId}`),
-    [INVITE_WORKER]: ({ workerId }: {
-        workerId: string
-    }) => request('POST', `/worker`, {
-        body: JSON.stringify({ workerId })
+    [GET_CUSTOMERS]: () => request('GET', '/customers'),
+    [GET_CUSTOMER]: ({ customerId }: { 
+        customerId: string 
+    }) => request('GET', `/customers/${customerId}`),
+    [INVITE_CUSTOMER]: ({ customerId }: {
+        customerId: string
+    }) => request('POST', `/customers`, {
+        body: JSON.stringify({ customerId })
     })
 }
 

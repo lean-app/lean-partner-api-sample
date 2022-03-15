@@ -1,7 +1,10 @@
-import { ulid } from "ulid";
+import { APIGatewayProxyEvent } from "aws-lambda";
+import { response } from "../../response";
 import CustomerService, { CREATE_CUSTOMER } from "../../services/customers.service";
 
-export const handler = async (event: any) => {
+export const handler = async (event: APIGatewayProxyEvent) => {
+    const { partnerUserId } = event.pathParameters ?? { };
+
     try {
         const result = await CustomerService.perform({
             type: CREATE_CUSTOMER,
@@ -11,26 +14,22 @@ export const handler = async (event: any) => {
                     lastName: "Doe",
                     birthday: "1980-12-31",
                     phoneNumber: "+14085008105",
-                    email: `janedoe+${ulid()}@gmail.com`,
+                    email: `janedoe+${partnerUserId}@gmail.com`,
                     street: "700 Treehouse Drive",
                     city: "San Jose",
                     state: "CA",
                     postalCode: "95101",
-                    partnerUserId: ulid(),
+                    partnerUserId,
                     registrationDate: "2020-01-01",
                     invite: true
                 }
             }
         });
         
-        return ({ statusCode: 201, body: JSON.stringify(result), headers: {
-            'Access-Control-Allow-Origins': 'http://localhost:3000',
-            'Access-Control-Allow-Methods': 'POST',
-            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'
-        }});
+        return response(201, result);
 
     } catch (error) {
         console.error(error);
-        return ({ statusCode: 500, body: 'Internal Server Error.' });
+        return response(500);
     }
 }

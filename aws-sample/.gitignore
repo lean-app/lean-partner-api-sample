@@ -1,4 +1,5 @@
 cdk.out
 node_modules
 
-apiKey.ts
+**/apiKey.ts
+**/cdk-outputs.json
