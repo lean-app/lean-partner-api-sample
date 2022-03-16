@@ -1,5 +1,4 @@
-import { apiKey } from '../apiKey';
-import { apiEndpoint } from '../config';
+import { apiKey, endpoint } from '../config';
 
 export const INVITE_CUSTOMER = 'InviteCustomer';
 
@@ -9,7 +8,7 @@ export const GET_CUSTOMER = 'GetCustomer';
 const request = (method: string, path: string, options?: {
     body?: string,
     headers?: { [key: string]: string }
-}) => fetch(`${apiEndpoint}${path}`, {
+}) => fetch(`${endpoint}${path}`, {
     mode: 'cors',
     ...options,
     headers: {

@@ -35,8 +35,14 @@ export const InviteWorkerModal = ({ worker, closeModal }: { worker: any, closeMo
       birthday,
       partnerUserId: worker.id
     }
-  }).then(() => closeModal())
-  .catch(() => toast('An error occured.'));
+  }).then((result) => {
+    if (result.message) {
+      return Promise.reject(result.message)
+    }
+    
+    toast('Worker invite sent!');
+    closeModal();
+  }).catch((error) => toast(error));
 
   return (
     <Form onSubmit={(e) => [e.preventDefault(), submit()]}>
