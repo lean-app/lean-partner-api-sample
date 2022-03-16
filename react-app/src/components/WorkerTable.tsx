@@ -68,16 +68,28 @@ const toRowDefs = (worker: any) => {
     })
 };
 
+const initialWorkers = [ (() => {
+    const id = ulid();
+    return ({
+        id,
+        name: 'Zach Jobe',
+        paymentMethod: 'bank_account',
+        email: `grant+${id}@withlean.com`,
+        street: '1234 Donut Circle',
+        city: 'Los Angeles',
+        state: 'CA',
+        postalCode: '90000',
+        phoneNumber: `${`${Math.random()}`.substring(2, 5)}-${ `${Math.random()}`.substring(2, 5)}-${`${Math.random()}`.substring(2, 6)}`,
+        birthday: '1990-09-19'
+    });
+})() ];
+
 export const WorkerTable = () => {
     const [workerData] = useObservable(WorkerStore.pipe(selectAllEntities()));
     const [activeWorker] = useObservable(WorkerStore.pipe(selectActiveEntity()));
 
     useDidMount(() => {
-        WorkerStore.update(setEntities([{
-            id: ulid(),
-            name: 'Zach Jobe',
-            paymentMethod: 'bank_account'
-        }]));
+        WorkerStore.update(setEntities(initialWorkers));
     });
 
     let workerCells: any[] = [];

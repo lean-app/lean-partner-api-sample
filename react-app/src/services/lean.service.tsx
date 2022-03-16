@@ -18,10 +18,8 @@ const handlers: { [key: string]: Function } = {
     [GET_CUSTOMER]: ({ customerId }: { 
         customerId: string 
     }) => request('GET', `/customers/${customerId}`),
-    [INVITE_CUSTOMER]: ({ id: partnerUserId }: {
-        id: string
-    }) => request('POST', `/customers`, {
-        body: JSON.stringify({ partnerUserId })
+    [INVITE_CUSTOMER]: ({ customer }: any) => request('POST', `/customers`, {
+        body: JSON.stringify(customer)
     })
 }
 

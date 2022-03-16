@@ -11,11 +11,12 @@ export const InviteWorkerModal = ({ worker }: { worker: any }) => {
   const [firstName, setFirstName] = useState(workerFirstName);
   const [middleName, setMiddleName] = useState(workerMiddleOrLastName && workerLastName ? workerMiddleOrLastName : '');
   const [lastName, setLastName] = useState(workerLastName ?? workerMiddleOrLastName);
+  const [email, setEmail] = useState(worker.email);
   const [street, setStreet] = useState(worker.street);
   const [city, setCity] = useState(worker.city);
   const [state, setState] = useState(worker.state);
   const [country, setCountry] = useState(worker.country);
-  const [zipcode, setZipcode] = useState(worker.zipcode);
+  const [postalCode, setPostalCode] = useState(worker.postalCode);
   const [phoneNumber, setPhoneNumber] = useState(worker.phoneNumber);
   const [birthday, setBirthday] = useState(worker.birthday);
 
@@ -30,11 +31,12 @@ export const InviteWorkerModal = ({ worker }: { worker: any }) => {
             firstName,
             middleName,
             lastName,
+            email,
             street,
             city,
             state,
             country,
-            zipcode,
+            postalCode,
             phoneNumber,
             birthday,
             partnerUserId: worker.id
@@ -57,6 +59,9 @@ export const InviteWorkerModal = ({ worker }: { worker: any }) => {
               <Form.Label>Last Name</Form.Label>
               <Form.Control type="text" placeholder="Last Name" defaultValue={lastName} onChange={(e) => setLastName(e.target.value)}></Form.Control>
 
+              <Form.Label>Email</Form.Label>
+              <Form.Control type="email" placeholder="Email" defaultValue={email} onChange={(e) => setEmail(e.target.value)}></Form.Control>
+
               <Form.Label>Street</Form.Label>
               <Form.Control type="text" placeholder="Street" defaultValue={street} onChange={(e) => setStreet(e.target.value)}></Form.Control>
 
@@ -66,14 +71,11 @@ export const InviteWorkerModal = ({ worker }: { worker: any }) => {
               <Form.Label>State</Form.Label>
               <Form.Control type="text" placeholder="State" defaultValue={state} onChange={(e) => setState(e.target.value)}></Form.Control>
 
-              <Form.Label>Country</Form.Label>
-              <Form.Control type="text" placeholder="Country" defaultValue={country} onChange={(e) => setCountry(e.target.value)}></Form.Control>
-
-              <Form.Label>ZIP Code</Form.Label>
-              <Form.Control type="text" placeholder="00000" defaultValue={zipcode} onChange={(e) => setZipcode(e.target.value)}></Form.Control>
+              <Form.Label>Postal Code</Form.Label>
+              <Form.Control type="text" placeholder="00000" defaultValue={postalCode} onChange={(e) => setPostalCode(e.target.value)}></Form.Control>
             
               <Form.Label>Phone Number</Form.Label>
-              <Form.Control type="phone" placeholder="555-555-5555" defaultValue={zipcode} onChange={(e) => setPhoneNumber(e.target.value)}></Form.Control>
+              <Form.Control type="phone" placeholder="555-555-5555" defaultValue={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}></Form.Control>
             
               <Form.Label>Birthday</Form.Label>
               <Form.Control type="date" placeholder="02/02/2022" defaultValue={birthday} onChange={(e) => setBirthday(e.target.value)}></Form.Control>
