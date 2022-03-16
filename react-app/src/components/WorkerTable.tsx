@@ -69,9 +69,11 @@ const toRowDefs = (worker: any) => {
                             }).then((customerData) => {
                                 console.log(customerData)
                                 if (customerData.message) {
-                                    return toast(customerData);
+                                    toast(customerData.message);
+                                    return;
                                 }
                                 
+                                toast("Worker refreshed!");
                                 if (customerData.updatedAt <= worker.updatedAt) {
                                     return;
                                 }

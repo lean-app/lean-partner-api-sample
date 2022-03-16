@@ -1,17 +1,14 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-
-import { AppLoadingOverlay } from './components/AppLoadingOverlay';
-import { Home } from './pages/Home';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { ToastContainer } from 'react-toastify';
+import { WorkerTable } from './components/WorkerTable';
 
 const App = () => {
-  return <>
-    <Home />
+  return <div>
     <ToastContainer />
-  </>
+    <WorkerTable />
+  </div>
 };
 
 export default App;
