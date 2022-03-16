@@ -2,7 +2,7 @@ import React from 'react';
 import { ulid } from 'ulid';
 import { useObservable } from '@ngneat/react-rxjs';
 
-import Lean, { INVITE_CUSTOMER } from '../services/lean.service';
+import Lean, { GET_CUSTOMER, INVITE_CUSTOMER } from '../services/lean.service';
 
 import Button from 'react-bootstrap/Button';
 import { useDidMount } from '../hooks/useDidMount';
@@ -10,9 +10,10 @@ import { useDidMount } from '../hooks/useDidMount';
 import { Table } from './Table';
 
 import WorkerStore from '../stores/worker.store';
-import { selectActiveEntity, selectAllEntities, setActiveId, setEntities } from '@ngneat/elf-entities';
+import { addEntities, selectActiveEntity, selectAllEntities, setActiveId, setEntities, updateEntities } from '@ngneat/elf-entities';
 import { InviteWorkerModal } from './Worker/InviteWorkerModal';
 import Modal from 'react-bootstrap/Modal';
+import { toast } from 'react-toastify';
 
 const headerCellDefs = [
     {
@@ -43,13 +44,13 @@ const toRowDefs = (worker: any) => {
     return ({ id, 
         cellDefs: [
             {
-                key: `${id}-name`,
-                width: headerCellDefs[0].width, 
-                content: name,
-            },{
                 key: `${id}-id`,
                 width: headerCellDefs[1].width, 
                 content: id,
+            },{
+                key: `${id}-name`,
+                width: headerCellDefs[0].width, 
+                content: name,
             },{
                 key: `${id}-payment-method`,
                 width: headerCellDefs[2].width, 
@@ -61,6 +62,27 @@ const toRowDefs = (worker: any) => {
                     <div className="worker-table-item-actions">
                         {paymentMethod !== 'lean' && <Button onClick={() => WorkerStore.update(setActiveId(id))}>Invite</Button>}
                         <Button>Delivery</Button>
+                        <Button onClick={() => {
+                            Lean.perform({
+                                type: GET_CUSTOMER,
+                                params: id
+                            }).then((customerData) => {
+                                console.log(customerData, worker);
+                                if (customerData.updatedAt <= worker.updatedAt) {
+                                    return;
+                                }
+
+                                WorkerStore.update(
+                                    updateEntities(id, (entity) => {
+                                        if (customerData.status === 'ACTIVE' && worker.paymentMethod !== 'lean') {
+                                            entity.paymentMethod = 'lean';
+                                        }
+
+                                        return entity;
+                                    })
+                                )
+                            }).catch((error) => toast(error));
+                        }}>Refresh</Button>
                     </div>
                 )
             }
@@ -69,13 +91,13 @@ const toRowDefs = (worker: any) => {
 };
 
 const initialWorkers = [ (() => {
-    const id = ulid();
+    const id = '01FY8D77VVNTG93Z9VVRJ24SWX';
     return ({
         id,
         name: 'Zach Jobe',
         paymentMethod: 'bank_account',
         email: `grant+${id}@withlean.com`,
-        street: '1234 Donut Circle',
+        street: 'residential house',
         city: 'Los Angeles',
         state: 'CA',
         postalCode: '90000',
@@ -90,6 +112,10 @@ export const WorkerTable = () => {
     const [activeWorker] = useObservable(WorkerStore.pipe(selectActiveEntity()));
 
     useDidMount(() => {
+        if (Object.keys(WorkerStore.getValue().entities).length > 0) {
+            return;
+        }
+        
         WorkerStore.update(setEntities(initialWorkers));
     });
 

@@ -15,9 +15,7 @@ const request = (method: string, path: string, options?: {
 
 const handlers: { [key: string]: Function } = {
     [GET_CUSTOMERS]: () => request('GET', '/customers'),
-    [GET_CUSTOMER]: ({ customerId }: { 
-        customerId: string 
-    }) => request('GET', `/customers/${customerId}`),
+    [GET_CUSTOMER]: (customerId: string) => request('GET', `/customers/${customerId}`),
     [INVITE_CUSTOMER]: (customer: any) => request('POST', `/customers`, {
         body: JSON.stringify(customer)
     })
@@ -39,7 +37,7 @@ export interface Result {
     error?: any
 };
 
-const perform = async ({ type, params, options }: APIAction, cb?: Function): Promise<Result> => {
+const perform = async ({ type, params, options }: APIAction, cb?: Function) => {
   const { log = 'ERROR', logger: userLogger = defaultLogger } = options ?? { };
   const logger = {
       next: undefined,
@@ -56,14 +54,13 @@ const perform = async ({ type, params, options }: APIAction, cb?: Function): Pro
 
   try {
     const data = await handler(params);
-    const result = { data };
 
     if (log === 'ALL') {
-        logger.next?.(result);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+        logger.next?.(data);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
     }
 
-    cb?.(result);
-    return result;
+    cb?.({ data });
+    return data;
   } catch (e: any) {
     const error = e instanceof Error ? e : new Error(e);
 
@@ -71,10 +68,8 @@ const perform = async ({ type, params, options }: APIAction, cb?: Function): Pro
         logger.error?.({ type, params, error });
     }
 
-    const result = { error };
-    cb?.(result);  
-    
-    return result;
+    cb?.({ error });  
+    throw error;
   }
 };
 
