@@ -1,11 +1,10 @@
 import * as path from 'path';
 
-import { CfnOutput, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
-import { AuthorizationType, Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { StaticWebsiteStack } from './stacks/StaticWebsite';
-import { AttributeType, BillingMode, ProjectionType, Table } from 'aws-cdk-lib/aws-dynamodb';
 
 const createLambdaIntegration = (scope: Construct, { function: functionOptions, integration: integrationOptions }: {
   function: {
@@ -19,14 +18,12 @@ const createLambdaIntegration = (scope: Construct, { function: functionOptions, 
     bundling: {
       sourceMap: true,
       sourceMapMode: SourceMapMode.INLINE
-    }
+    },
+    timeout: Duration.seconds(10),
   }), integrationOptions);
-
-const removalPolicy = RemovalPolicy.DESTROY;
 
 export class AwsSampleStack extends Stack {
   api: RestApi;
-  table: Table;
   client: StaticWebsiteStack;
   outputs: CfnOutput[] = [];
 

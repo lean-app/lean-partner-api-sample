@@ -8,7 +8,7 @@ const toRowCell = ({ key, content, width }: any) => {
         .filter(({ value }) => value)
         .reduce((styles, styleDef) => ({ ...styles, [styleDef.label]: styleDef.value }), {});
 
-    return <div style={style} key={key}>{content}</div>
+    return <div style={style} key={key}>{typeof content === 'function' ? content() : content}</div>
 };
 
 const toRow = ({ id, cellDefs }: any) => (

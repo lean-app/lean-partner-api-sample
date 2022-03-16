@@ -1,6 +1,6 @@
 import { EmailAddress } from "./email.types";
 
-export enum WorkerStatus {
+export enum CustomerStatus {
     Pending = 'PENDING',
     Created = 'CREATED',
     PendingRegistration = 'PENDING_REGISTRATION',
@@ -8,7 +8,7 @@ export enum WorkerStatus {
     Inactive = 'INACTIVE',
 }
 
-export interface Worker {
+export interface Customer {
     firstName: string,
     middleName: string,
     lastName: string,
@@ -20,7 +20,7 @@ export interface Worker {
     city: string,
     state: string,
     postalCode: string,
-    status: WorkerStatus,
+    status: CustomerStatus,
     partnerUserId: string,
     registrationDate: string,
     createdAt: string,

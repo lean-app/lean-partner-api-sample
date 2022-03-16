@@ -21,6 +21,7 @@ export interface ResponseOptions {
   log?: boolean | ((value: Response) => void)
 }
 
+
 export const response = (statusCode: number, body?: any, options?: ResponseOptions): Response => {
   const responseBody = typeof body === 'undefined' ?  defaultBody(statusCode) : body;
   const responseBodyValue = options?.minify ? JSON.stringify(responseBody) : JSON.stringify(responseBody, null, 2);

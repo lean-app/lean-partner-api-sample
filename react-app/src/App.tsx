@@ -5,11 +5,11 @@ import './App.css';
 import { AppLoadingOverlay } from './components/AppLoadingOverlay';
 import { Home } from './pages/Home';
 
-function App() {
+import { ToastContainer } from 'react-toastify';
 
-  return (
-    <Home />
-  );
-}
+const App = () => <>
+  <Home />
+  <ToastContainer />
+</>
 
 export default App;

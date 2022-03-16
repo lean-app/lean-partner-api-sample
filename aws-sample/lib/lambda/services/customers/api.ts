@@ -2,7 +2,7 @@ import fetch, { Response } from 'node-fetch';
 
 import { apiKey } from '../../../../apiKey';
 import { EmailAddress } from '../../types/email.types';
-import { Worker } from '../../types/worker.types';
+import { Customer } from '../../types/customer.types';
 
 const API_ENDPOINT = 'https://app.staging.withlean.com/api';
 const partnerApi = (path: string) => `${API_ENDPOINT}/${path}`;
@@ -49,12 +49,16 @@ export interface CreateCustomerProps {
     invite: boolean,
 };
 
-export const createCustomer = ({ worker }: { 
-    worker: Worker 
-}) => fetch(partnerApi(`customer`), {
-    method: 'POST',
-    body: JSON.stringify(worker),
-    headers: {
-        authorization: `Basic ${encodedCredentials}`
-    }
-}).then(parseResponse);
+export const createCustomer = ({ customer }: { 
+    customer: Customer 
+}) => {
+    console.log(`Customer ${JSON.stringify(customer, undefined, 2)}`);
+    return fetch(partnerApi(`customer`), {
+        method: 'POST',
+        body: JSON.stringify(customer, undefined, 2),
+        headers: {
+            'Authorization': `Basic ${encodedCredentials}`,
+            'Content-Type': 'application/json'
+        }
+    }).then(parseResponse);
+}

@@ -1,15 +1,22 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
+
 import { response } from "../../response";
 import CustomerService, { CREATE_CUSTOMER } from "../../services/customers.service";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-    const { partnerUserId } = event.pathParameters ?? { };
+    if (!event.body) {
+        return response(400);
+    }
 
+    console.log(event.body);
+    
     try {
+        const { partnerUserId } = JSON.parse(event.body) as { [key: string]: any };
+
         const result = await CustomerService.perform({
             type: CREATE_CUSTOMER,
             params: {
-                workers: {
+                customer: {
                     firstName: "Jane",
                     lastName: "Doe",
                     birthday: "1980-12-31",

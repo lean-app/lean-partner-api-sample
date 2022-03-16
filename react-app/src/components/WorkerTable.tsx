@@ -3,7 +3,7 @@ import { ulid } from 'ulid';
 import { useObservable } from '@ngneat/react-rxjs';
 
 import Button from 'react-bootstrap/Button';
-import { useDidMount } from '../hooks/lifecycle';
+import { useDidMount } from '../hooks/useDidMount';
 
 import Lean, { GET_CUSTOMERS, INVITE_CUSTOMER } from '../services/lean.service';
 import { Table } from './Table';
@@ -34,32 +34,38 @@ const headerCellDefs = [
     }
 ];
 
-const toRowDefs = ({ name, id, paymentMethod }: any) => ({ id, 
-    cellDefs: [
-        {
-            key: `${id}-name`,
-            width: headerCellDefs[0].width, 
-            content: name,
-        },{
-            key: `${id}-id`,
-            width: headerCellDefs[1].width, 
-            content: id,
-        },{
-            key: `${id}-payment-method`,
-            width: headerCellDefs[2].width, 
-            content: paymentMethod,
-        },{
-            key: `${id}-actions`,
-            width: '20%',
-            content: <div className="worker-table-item-actions">
-                {paymentMethod !== 'lean' && <Button onClick={() => Lean.perform({ type: INVITE_CUSTOMER, params: {
-                    partnerUserId: id
-                } })}>Invite</Button>}
-                <Button>Delivery</Button>
-            </div>
-        }
-    ] 
-});
+const toRowDefs = (worker: any) => {
+    const { id, name, paymentMethod } = worker;
+
+    return ({ id, 
+        cellDefs: [
+            {
+                key: `${id}-name`,
+                width: headerCellDefs[0].width, 
+                content: name,
+            },{
+                key: `${id}-id`,
+                width: headerCellDefs[1].width, 
+                content: id,
+            },{
+                key: `${id}-payment-method`,
+                width: headerCellDefs[2].width, 
+                content: paymentMethod,
+            },{
+                key: `${id}-actions`,
+                width: '20%',
+                content: () => {
+                    return <div className="worker-table-item-actions">
+                        {paymentMethod !== 'lean' && <Button onClick={() => {
+                            Lean.perform({ type: INVITE_CUSTOMER, params: worker })
+                    }}>Invite</Button>}
+                        <Button>Delivery</Button>
+                    </div>
+                }
+            }
+        ] 
+    })
+};
 
 export const WorkerTable = () => {
     const [workerData] = useObservable(WorkerStore.pipe(selectAllEntities()));
