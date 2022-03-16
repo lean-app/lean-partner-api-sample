@@ -18,7 +18,7 @@ const handlers: { [key: string]: Function } = {
     [GET_CUSTOMER]: ({ customerId }: { 
         customerId: string 
     }) => request('GET', `/customers/${customerId}`),
-    [INVITE_CUSTOMER]: ({ customer }: any) => request('POST', `/customers`, {
+    [INVITE_CUSTOMER]: (customer: any) => request('POST', `/customers`, {
         body: JSON.stringify(customer)
     })
 }

@@ -3,47 +3,43 @@ import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
+import { toast } from 'react-toastify';
 
 import Lean, { INVITE_CUSTOMER } from '../../services/lean.service';
 
-export const InviteWorkerModal = ({ worker }: { worker: any }) => {
+export const InviteWorkerModal = ({ worker, closeModal }: { worker: any, closeModal: () => void }) => {
   const [workerFirstName, workerMiddleOrLastName, workerLastName] = (worker?.name ?? '').split(' ');
-  const [firstName, setFirstName] = useState(workerFirstName);
+  const [firstName, setFirstName] = useState(workerFirstName ?? '');
   const [middleName, setMiddleName] = useState(workerMiddleOrLastName && workerLastName ? workerMiddleOrLastName : '');
-  const [lastName, setLastName] = useState(workerLastName ?? workerMiddleOrLastName);
-  const [email, setEmail] = useState(worker.email);
-  const [street, setStreet] = useState(worker.street);
-  const [city, setCity] = useState(worker.city);
-  const [state, setState] = useState(worker.state);
-  const [country, setCountry] = useState(worker.country);
-  const [postalCode, setPostalCode] = useState(worker.postalCode);
-  const [phoneNumber, setPhoneNumber] = useState(worker.phoneNumber);
-  const [birthday, setBirthday] = useState(worker.birthday);
+  const [lastName, setLastName] = useState(workerLastName ?? workerMiddleOrLastName ?? '');
+  const [email, setEmail] = useState(worker?.email ?? '');
+  const [street, setStreet] = useState(worker?.street ?? '');
+  const [city, setCity] = useState(worker?.city ?? '');
+  const [state, setState] = useState(worker?.state ?? '');
+  const [postalCode, setPostalCode] = useState(worker?.postalCode ?? '');
+  const [phoneNumber, setPhoneNumber] = useState(worker?.phoneNumber ?? '');
+  const [birthday, setBirthday] = useState(worker?.birthday ?? '');
 
+  const submit = () => Lean.perform({
+    type: INVITE_CUSTOMER,
+    params: {
+      firstName,
+      middleName,
+      lastName,
+      email,
+      street,
+      city,
+      state,
+      postalCode,
+      phoneNumber,
+      birthday,
+      partnerUserId: worker.id
+    }
+  }).then(() => closeModal())
+  .catch(() => toast('An error occured.'));
 
   return (
-    <Form onSubmit={(e) => {
-      e.preventDefault();
-      Lean.perform({
-        type: INVITE_CUSTOMER,
-        params: {
-          customer: {
-            firstName,
-            middleName,
-            lastName,
-            email,
-            street,
-            city,
-            state,
-            country,
-            postalCode,
-            phoneNumber,
-            birthday,
-            partnerUserId: worker.id
-          }
-        }
-      })
-    }}>
+    <Form onSubmit={(e) => [e.preventDefault(), submit()]}>
       <Card>
         <Card.Header>
           <Card.Title>Invite Worker</Card.Title>

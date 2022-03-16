@@ -101,7 +101,7 @@ export const WorkerTable = () => {
     return <>
         <Table header={{ cells: headerCellDefs }} rows={workerCells} />
         <Modal show={activeWorker !== undefined}>
-            <InviteWorkerModal worker={activeWorker} />
+            <InviteWorkerModal worker={activeWorker} closeModal={() => WorkerStore.update(setActiveId(undefined))}/>
         </Modal>
     </>;
 }
