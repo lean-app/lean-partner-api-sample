@@ -1,5 +1,5 @@
-import { createStore, withProps } from '@ngneat/elf';
-import { withEntities } from '@ngneat/elf-entities';
+import { createStore } from '@ngneat/elf';
+import { withActiveId, withEntities } from '@ngneat/elf-entities';
 
 interface Worker { 
   id: string, 
@@ -8,5 +8,6 @@ interface Worker {
 
 export default createStore(
   { name: 'workers' },
-  withEntities<Worker>()
+  withEntities<Worker>(),
+  withActiveId()
 );

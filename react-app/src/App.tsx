@@ -7,9 +7,11 @@ import { Home } from './pages/Home';
 
 import { ToastContainer } from 'react-toastify';
 
-const App = () => <>
-  <Home />
-  <ToastContainer />
-</>
+const App = () => {
+  return <>
+    <Home />
+    <ToastContainer />
+  </>
+};
 
 export default App;

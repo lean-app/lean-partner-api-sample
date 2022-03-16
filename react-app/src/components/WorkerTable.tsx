@@ -2,14 +2,17 @@ import React from 'react';
 import { ulid } from 'ulid';
 import { useObservable } from '@ngneat/react-rxjs';
 
+import Lean, { INVITE_CUSTOMER } from '../services/lean.service';
+
 import Button from 'react-bootstrap/Button';
 import { useDidMount } from '../hooks/useDidMount';
 
-import Lean, { GET_CUSTOMERS, INVITE_CUSTOMER } from '../services/lean.service';
 import { Table } from './Table';
 
 import WorkerStore from '../stores/worker.store';
-import { selectAllEntities, setEntities } from '@ngneat/elf-entities';
+import { selectActiveEntity, selectAllEntities, setActiveId, setEntities } from '@ngneat/elf-entities';
+import { InviteWorkerModal } from './Worker/InviteWorkerModal';
+import Modal from 'react-bootstrap/Modal';
 
 const headerCellDefs = [
     {
@@ -54,14 +57,12 @@ const toRowDefs = (worker: any) => {
             },{
                 key: `${id}-actions`,
                 width: '20%',
-                content: () => {
-                    return <div className="worker-table-item-actions">
-                        {paymentMethod !== 'lean' && <Button onClick={() => {
-                            Lean.perform({ type: INVITE_CUSTOMER, params: worker })
-                    }}>Invite</Button>}
+                content: (
+                    <div className="worker-table-item-actions">
+                        {paymentMethod !== 'lean' && <Button onClick={() => WorkerStore.update(setActiveId(id))}>Invite</Button>}
                         <Button>Delivery</Button>
                     </div>
-                }
+                )
             }
         ] 
     })
@@ -69,6 +70,7 @@ const toRowDefs = (worker: any) => {
 
 export const WorkerTable = () => {
     const [workerData] = useObservable(WorkerStore.pipe(selectAllEntities()));
+    const [activeWorker] = useObservable(WorkerStore.pipe(selectActiveEntity()));
 
     useDidMount(() => {
         WorkerStore.update(setEntities([{
@@ -84,5 +86,10 @@ export const WorkerTable = () => {
             .map(toRowDefs);
     }
 
-    return <Table header={{ cells: headerCellDefs }} rows={workerCells} />;
+    return <>
+        <Table header={{ cells: headerCellDefs }} rows={workerCells} />
+        <Modal show={activeWorker !== undefined}>
+            <InviteWorkerModal worker={activeWorker} />
+        </Modal>
+    </>;
 }
