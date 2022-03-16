@@ -67,7 +67,11 @@ const toRowDefs = (worker: any) => {
                                 type: GET_CUSTOMER,
                                 params: id
                             }).then((customerData) => {
-                                console.log(customerData, worker);
+                                console.log(customerData)
+                                if (customerData.message) {
+                                    return toast(customerData);
+                                }
+                                
                                 if (customerData.updatedAt <= worker.updatedAt) {
                                     return;
                                 }
@@ -81,7 +85,7 @@ const toRowDefs = (worker: any) => {
                                         return entity;
                                     })
                                 )
-                            }).catch((error) => toast(error));
+                            });
                         }}>Refresh</Button>
                     </div>
                 )
@@ -90,33 +94,29 @@ const toRowDefs = (worker: any) => {
     })
 };
 
-const initialWorkers = [ (() => {
-    const id = '01FY8D77VVNTG93Z9VVRJ24SWX';
-    return ({
-        id,
-        name: 'Zach Jobe',
-        paymentMethod: 'bank_account',
-        email: `grant+${id}@withlean.com`,
-        street: 'residential house',
-        city: 'Los Angeles',
-        state: 'CA',
-        postalCode: '90000',
-        phoneNumber: `${`${Math.random()}`.substring(2, 5)}-${ `${Math.random()}`.substring(2, 5)}-${`${Math.random()}`.substring(2, 6)}`,
-        birthday: '1990-09-19'
-    });
-})() ];
-
-
 export const WorkerTable = () => {
     const [workerData] = useObservable(WorkerStore.pipe(selectAllEntities()));
     const [activeWorker] = useObservable(WorkerStore.pipe(selectActiveEntity()));
 
     useDidMount(() => {
-        if (Object.keys(WorkerStore.getValue().entities).length > 0) {
+        const hasUsersToOnboard = Object.values(WorkerStore.getValue().entities).filter(({ paymentMethod }) => paymentMethod !== 'lean').length > 0;
+        if (hasUsersToOnboard) {
             return;
         }
-        
-        WorkerStore.update(setEntities(initialWorkers));
+
+        const id = '01FY8D77VVNTG93Z9VVRJ24SWX';
+        WorkerStore.update(addEntities(({
+            id,
+            name: 'Zach Jobe',
+            paymentMethod: 'bank_account',
+            email: `grant+${id}@withlean.com`,
+            street: 'residential house',
+            city: 'Los Angeles',
+            state: 'CA',
+            postalCode: '90000',
+            phoneNumber: `${`${Math.random()}`.substring(2, 5)}-${ `${Math.random()}`.substring(2, 5)}-${`${Math.random()}`.substring(2, 6)}`,
+            birthday: '1990-09-19'
+        })));
     });
 
     let workerCells: any[] = [];

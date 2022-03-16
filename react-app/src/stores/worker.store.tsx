@@ -17,7 +17,7 @@ const workerStore = createStore(
 );
 
 const instance = persistState(workerStore, {
-  key: 'todos',
+  key: 'workers',
   storage: localStorageStrategy,
 });
 
