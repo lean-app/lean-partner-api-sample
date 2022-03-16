@@ -8,7 +8,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "deploy": "cdk deploy --outputs-file ./cdk-outputs.json"
   },
   "devDependencies": {
     "@types/jest": "^26.0.10",
@@ -20,10 +21,9 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.54.0",
     "@types/aws-lambda": "^8.10.93",
     "@types/lodash": "^4.14.179",
-    "aws-cdk-lib": "2.15.0",
+    "aws-cdk-lib": "2.16.0",
     "constructs": "^10.0.0",
     "node-fetch": "^3.2.2",
     "source-map-support": "^0.5.16",

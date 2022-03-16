@@ -1,9 +1,10 @@
-import { result } from 'lodash';
+import { APIGatewayProxyEvent } from "aws-lambda";
+
 import { response } from '../../../response';
 import CustomerService, { GET_CUSTOMER } from '../../../services/customers.service';
 
-export const handler = async (event: any) => {
-    const { id } = event.pathParameters;
+export const handler = async (event: APIGatewayProxyEvent) => {
+    const { id } = event.pathParameters ?? { };
 
     if (!id) {
         return response(400);
