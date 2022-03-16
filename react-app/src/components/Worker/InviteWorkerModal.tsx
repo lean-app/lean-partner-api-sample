@@ -1,8 +1,13 @@
 import { useState } from 'react';
+
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 
-export const InviteWorkerModal = ({ worker }: { worker: any}) => {
-  const [workerFirstName, workerMiddleOrLastName, workerLastName] = worker.name.split(' ');
+import Lean, { INVITE_CUSTOMER } from '../../services/lean.service';
+
+export const InviteWorkerModal = ({ worker }: { worker: any }) => {
+  const [workerFirstName, workerMiddleOrLastName, workerLastName] = (worker?.name ?? '').split(' ');
   const [firstName, setFirstName] = useState(workerFirstName);
   const [middleName, setMiddleName] = useState(workerMiddleOrLastName && workerLastName ? workerMiddleOrLastName : '');
   const [lastName, setLastName] = useState(workerLastName ?? workerMiddleOrLastName);
@@ -11,34 +16,73 @@ export const InviteWorkerModal = ({ worker }: { worker: any}) => {
   const [state, setState] = useState(worker.state);
   const [country, setCountry] = useState(worker.country);
   const [zipcode, setZipcode] = useState(worker.zipcode);
+  const [phoneNumber, setPhoneNumber] = useState(worker.phoneNumber);
+  const [birthday, setBirthday] = useState(worker.birthday);
 
 
-  return <Form>
-    <h1>Invite Worker</h1>
-    <Form.Group>
-      <Form.Label>First Name</Form.Label>
-      <Form.Control type="text" placeholder="First Name" defaultValue={firstName}></Form.Control>
+  return (
+    <Form onSubmit={(e) => {
+      e.preventDefault();
+      Lean.perform({
+        type: INVITE_CUSTOMER,
+        params: {
+          customer: {
+            firstName,
+            middleName,
+            lastName,
+            street,
+            city,
+            state,
+            country,
+            zipcode,
+            phoneNumber,
+            birthday,
+            partnerUserId: worker.id
+          }
+        }
+      })
+    }}>
+      <Card>
+        <Card.Header>
+          <Card.Title>Invite Worker</Card.Title>
+        </Card.Header>
+        <Card.Body>
+            <Form.Group>
+              <Form.Label>First Name</Form.Label>
+              <Form.Control type="text" placeholder="First Name" defaultValue={firstName} onChange={(e) => setFirstName(e.target.value)}></Form.Control>
 
-      <Form.Label>Middle Name</Form.Label>
-      <Form.Control type="text" placeholder="Middle Name" defaultValue={middleName}></Form.Control>
+              <Form.Label>Middle Name</Form.Label>
+              <Form.Control type="text" placeholder="Middle Name" defaultValue={middleName} onChange={(e) => setMiddleName(e.target.value)}></Form.Control>
 
-      <Form.Label>Last Name</Form.Label>
-      <Form.Control type="text" placeholder="Last Name" defaultValue={lastName}></Form.Control>
+              <Form.Label>Last Name</Form.Label>
+              <Form.Control type="text" placeholder="Last Name" defaultValue={lastName} onChange={(e) => setLastName(e.target.value)}></Form.Control>
 
-      <Form.Label>Street</Form.Label>
-      <Form.Control type="text" placeholder="Street" defaultValue={street}></Form.Control>
+              <Form.Label>Street</Form.Label>
+              <Form.Control type="text" placeholder="Street" defaultValue={street} onChange={(e) => setStreet(e.target.value)}></Form.Control>
 
-      <Form.Label>City</Form.Label>
-      <Form.Control type="text" placeholder="City" defaultValue={city}></Form.Control>
+              <Form.Label>City</Form.Label>
+              <Form.Control type="text" placeholder="City" defaultValue={city} onChange={(e) => setCity(e.target.value)}></Form.Control>
 
-      <Form.Label>State</Form.Label>
-      <Form.Control type="text" placeholder="State" defaultValue={state}></Form.Control>
+              <Form.Label>State</Form.Label>
+              <Form.Control type="text" placeholder="State" defaultValue={state} onChange={(e) => setState(e.target.value)}></Form.Control>
 
-      <Form.Label>Country</Form.Label>
-      <Form.Control type="text" placeholder="Country" defaultValue={country}></Form.Control>
+              <Form.Label>Country</Form.Label>
+              <Form.Control type="text" placeholder="Country" defaultValue={country} onChange={(e) => setCountry(e.target.value)}></Form.Control>
 
-      <Form.Label>ZIP Code</Form.Label>
-      <Form.Control type="text" placeholder="ZIP Code" defaultValue={zipcode}></Form.Control>
-    </Form.Group>
-  </Form>
+              <Form.Label>ZIP Code</Form.Label>
+              <Form.Control type="text" placeholder="00000" defaultValue={zipcode} onChange={(e) => setZipcode(e.target.value)}></Form.Control>
+            
+              <Form.Label>Phone Number</Form.Label>
+              <Form.Control type="phone" placeholder="555-555-5555" defaultValue={zipcode} onChange={(e) => setPhoneNumber(e.target.value)}></Form.Control>
+            
+              <Form.Label>Birthday</Form.Label>
+              <Form.Control type="date" placeholder="02/02/2022" defaultValue={birthday} onChange={(e) => setBirthday(e.target.value)}></Form.Control>
+            </Form.Group>
+        </Card.Body>
+        <Card.Footer>
+          <Button type="submit">Submit</Button>
+        </Card.Footer>
+      </Card>
+    </Form>
+  );
 }
