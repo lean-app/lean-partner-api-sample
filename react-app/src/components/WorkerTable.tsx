@@ -84,6 +84,7 @@ const initialWorkers = [ (() => {
     });
 })() ];
 
+
 export const WorkerTable = () => {
     const [workerData] = useObservable(WorkerStore.pipe(selectAllEntities()));
     const [activeWorker] = useObservable(WorkerStore.pipe(selectActiveEntity()));
@@ -98,10 +99,12 @@ export const WorkerTable = () => {
             .map(toRowDefs);
     }
 
+    const closeModal = () => WorkerStore.update(setActiveId(undefined));
+
     return <>
         <Table header={{ cells: headerCellDefs }} rows={workerCells} />
-        <Modal show={activeWorker !== undefined}>
-            <InviteWorkerModal worker={activeWorker} closeModal={() => WorkerStore.update(setActiveId(undefined))}/>
+        <Modal show={activeWorker !== undefined} onHide={closeModal}>
+            <InviteWorkerModal worker={activeWorker} closeModal={closeModal}/>
         </Modal>
     </>;
 }
