@@ -17,14 +17,14 @@ import { toast } from 'react-toastify';
 
 const headerCellDefs = [
     {
+        key: 'id',
+        content: 'Id',
+        width: '30%',
+    },
+    {
         key: 'name',
         content: 'Name',
         width: '20%',
-    },
-    {
-        key: 'id',
-        content: 'Id',
-        width: '10%',
     },
     {
         key: 'payment_method',
@@ -45,11 +45,11 @@ const toRowDefs = (worker: any) => {
         cellDefs: [
             {
                 key: `${id}-id`,
-                width: headerCellDefs[1].width, 
+                width: headerCellDefs[0].width, 
                 content: id,
             },{
                 key: `${id}-name`,
-                width: headerCellDefs[0].width, 
+                width: headerCellDefs[1].width, 
                 content: name,
             },{
                 key: `${id}-payment-method`,
@@ -57,7 +57,7 @@ const toRowDefs = (worker: any) => {
                 content: paymentMethod,
             },{
                 key: `${id}-actions`,
-                width: '20%',
+                width: headerCellDefs[3].width,
                 content: (
                     <div className="worker-table-item-actions">
                         {paymentMethod !== 'lean' && <Button onClick={() => WorkerStore.update(setActiveId(id))}>Invite</Button>}

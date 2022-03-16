@@ -1,3 +1,4 @@
+import { apiKey } from '../apiKey';
 import { apiEndpoint } from '../config';
 
 export const INVITE_CUSTOMER = 'InviteCustomer';
@@ -6,10 +7,15 @@ export const GET_CUSTOMERS = 'GetCustomers';
 export const GET_CUSTOMER = 'GetCustomer';
 
 const request = (method: string, path: string, options?: {
-    body?: string
+    body?: string,
+    headers?: { [key: string]: string }
 }) => fetch(`${apiEndpoint}${path}`, {
     mode: 'cors',
     ...options,
+    headers: {
+        'X-API-Key': apiKey,
+        ...(options?.headers ?? { })
+    },
     method,
 }).then(response => response.json())
 

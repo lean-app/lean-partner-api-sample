@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
-import { Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { ApiKey, Cors, Deployment, IApiKey, LambdaIntegration, LambdaIntegrationOptions, RestApi, UsagePlan, Stage } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { StaticWebsiteStack } from './stacks/StaticWebsite';
@@ -24,6 +24,9 @@ const createLambdaIntegration = (scope: Construct, { function: functionOptions, 
 
 export class AwsSampleStack extends Stack {
   api: RestApi;
+  apiKey: IApiKey;
+  apiUsagePlan: UsagePlan;
+
   client: StaticWebsiteStack;
   outputs: CfnOutput[] = [];
 
@@ -52,7 +55,7 @@ export class AwsSampleStack extends Stack {
         allowCredentials: true,
         allowOrigins: Cors.ALL_ORIGINS,
         allowMethods: Cors.ALL_METHODS
-      }
+      },
     });
 
     this.api.root.addResource('customers');
@@ -61,7 +64,9 @@ export class AwsSampleStack extends Stack {
         name: 'GetCustomersHandler',
         path: '/lambda/api/customers/get.ts',
       }
-    }));
+    }), {
+      apiKeyRequired: true
+    });
 
     this.api.root.getResource('customers')?.addResource('{id}')
     this.api.root.getResource('customers')?.getResource('{id}')?.addMethod('GET', createLambdaIntegration(this, {
@@ -69,15 +74,35 @@ export class AwsSampleStack extends Stack {
         name: 'GetCustomerHandler',
         path: '/lambda/api/customers/{id}/get.ts',
       }
-    }));
+    }), {
+      apiKeyRequired: true 
+    });
 
     this.api.root.getResource('customers')?.addMethod('POST', createLambdaIntegration(this, {
       function: {
         name: 'PostCustomerHandler',
         path: '/lambda/api/customers/post.ts',
       }
-    }));
+    }), {
+      apiKeyRequired: true 
+    });
 
+    this.apiUsagePlan = this.api.addUsagePlan('SampleAppUsagePlan', {
+      throttle: {
+        rateLimit: 10,
+        burstLimit: 2
+      }
+    });
+
+    this.apiKey = this.api.addApiKey('SampleAppApiKey');
+    this.apiUsagePlan.addApiKey(this.apiKey);
+    this.apiUsagePlan.addApiStage({
+      api: this.api,
+      stage: this.api.deploymentStage,
+    });
+
+    this.apiKey.applyRemovalPolicy(RemovalPolicy.DESTROY);
+    this.apiUsagePlan.applyRemovalPolicy(RemovalPolicy.DESTROY);
     this.api.applyRemovalPolicy(RemovalPolicy.DESTROY);
   }
 }
