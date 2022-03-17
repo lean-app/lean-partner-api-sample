@@ -1,6 +1,6 @@
 import fetch, { Response } from 'node-fetch';
 
-import { apiKey } from '../../../../apiKey';
+import { apiKey } from '../../../../config';
 import { EmailAddress } from '../../types/email.types';
 import { Customer } from '../../types/customer.types';
 

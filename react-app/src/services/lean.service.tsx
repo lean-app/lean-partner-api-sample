@@ -33,7 +33,7 @@ const defaultLogger = {
 
 export interface APIAction { 
     type: string, 
-    params?: { [key: string]: any },
+    params?: any,
     options?: { [key: string]: any }
 };
 

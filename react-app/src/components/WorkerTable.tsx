@@ -101,6 +101,34 @@ export const WorkerTable = () => {
     const [activeWorker] = useObservable(WorkerStore.pipe(selectActiveEntity()));
 
     useDidMount(() => {
+        Promise.allSettled(workerData.map((worker) => {
+            Lean.perform({
+                type: GET_CUSTOMER,
+                params: worker.id
+            }).then((customerData) => {
+                console.log(customerData)
+                if (customerData.message) {
+                    toast(customerData.message);
+                    return;
+                }
+                
+                toast("Worker refreshed!");
+                if (customerData.updatedAt <= worker.updatedAt) {
+                    return;
+                }
+
+                WorkerStore.update(
+                    updateEntities(id, (entity) => {
+                        if (customerData.status === 'ACTIVE' && worker.paymentMethod !== 'lean') {
+                            entity.paymentMethod = 'lean';
+                        }
+
+                        return entity;
+                    })
+                )
+            });
+        }));
+
         const hasUsersToOnboard = Object.values(WorkerStore.getValue().entities).filter(({ paymentMethod }) => paymentMethod !== 'lean').length > 0;
         if (hasUsersToOnboard) {
             return;
