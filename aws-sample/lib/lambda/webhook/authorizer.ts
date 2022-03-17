@@ -29,7 +29,6 @@ const generatePolicy = (principalId: string, effect: string, resource: string): 
 }
 
 export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewayTokenAuthorizerEvent) => {
-  console.log(event);
   try {
     const signature = `${event.authorizationToken}`;
     const hmac = createHmac('sha1', webhookSecret);
