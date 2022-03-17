@@ -35,8 +35,7 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewa
     const hmac = createHmac('sha1', webhookSecret);
     const digest = hmac.digest('base64');
     const authorized = signature.localeCompare(digest);
-      
-    console.log(authorized, signature, digest, event);
+
     if (authorized === 0) {
       return generatePolicy('lean', 'Allow', event.methodArn);
     }
