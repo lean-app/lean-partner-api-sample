@@ -1,7 +1,5 @@
-import { APIGatewayAuthorizerResult, APIGatewayTokenAuthorizerEvent, APIGatewayTokenAuthorizerHandler } from 'aws-lambda';
+import { APIGatewayAuthorizerResult, APIGatewayRequestAuthorizerEvent, APIGatewayRequestAuthorizerHandler, APIGatewayTokenAuthorizerEvent, APIGatewayTokenAuthorizerHandler} from 'aws-lambda';
 import { createHmac } from 'crypto';
-import { map, split } from 'lodash';
-
 import { webhookSecret } from '../../../config';
 
 const generatePolicy = (principalId: string, effect: string, resource: string): APIGatewayAuthorizerResult => {
@@ -31,28 +29,20 @@ const generatePolicy = (principalId: string, effect: string, resource: string): 
 }
 
 export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewayTokenAuthorizerEvent) => {
+  console.log(event);
   try {
-    const signature = `${event.authorizationToken}`.split('');
+    const signature = `${event.authorizationToken}`;
     const hmac = createHmac('sha1', webhookSecret);
-    const digest = hmac.digest('base64').split('');
-    
-    const authorized = signature
-      .map((sigChar, idx) => [sigChar, digest[idx]])
-      .reduce((isEqual, [sigChar, digestChar]) => {
-        if (!isEqual) {
-          return isEqual;
-        }
-
-        console.log(sigChar.localeCompare(digestChar), { sigChar, digestChar });
-        return sigChar === digestChar;
-      }, true);
+    const digest = hmac.digest('base64');
+    const authorized = signature.localeCompare(digest);
       
-      if (authorized) {
-        return generatePolicy('lean', 'Allow', event.methodArn);
-      }
-    } catch (error) {
-      console.error(error);
+    console.log(authorized, signature, digest, event);
+    if (authorized === 0) {
+      return generatePolicy('lean', 'Allow', event.methodArn);
     }
-    
-    return generatePolicy('lean', 'Deny', event.methodArn);
+  } catch (error) {
+    console.error(error);
+  }
+  
+  return generatePolicy('lean', 'Deny', event.methodArn);
 }

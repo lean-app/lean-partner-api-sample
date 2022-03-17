@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
-import { IApiKey, Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi, TokenAuthorizer, UsagePlan, IdentitySource } from 'aws-cdk-lib/aws-apigateway';
+import { IApiKey, Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi, TokenAuthorizer, UsagePlan, IdentitySource, RequestAuthorizer, AuthorizationType, IAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { StaticWebsiteStack } from './stacks/StaticWebsite';
@@ -30,6 +30,7 @@ export class AwsSampleStack extends Stack {
   webhookApi: RestApi;
   webhookApiKey: IApiKey;
   webhookApiUsagePlan: UsagePlan;
+  webhookAuthorizer: RequestAuthorizer;
 
   client: StaticWebsiteStack;
   outputs: CfnOutput[] = [];
@@ -110,23 +111,29 @@ export class AwsSampleStack extends Stack {
 
   createWebHook() {
     this.webhookApi = new RestApi(this, 'WebhookRestApi', { });
+
+    this.webhookAuthorizer = new TokenAuthorizer(this, 'WebhookTokenAuthorizer', {
+      handler: new NodejsFunction(this, 'LeanWebhookAuthorizerFunction', {
+          entry: path.join(__dirname, '/lambda/webhook/authorizer.ts'),
+          handler: 'handler',
+          bundling: {
+            sourceMap: true,
+            sourceMapMode: SourceMapMode.INLINE
+          }
+      }),
+      identitySource: IdentitySource.header('x-lean-signature'),
+      resultsCacheTtl: Duration.minutes(0)
+    });
+
+
     this.webhookApi.root.addMethod('POST', createLambdaIntegration(this, {
       function: {
         name: 'PostWebhook',
         path: '/lambda/webhook/post.ts',
       }
     }), {
-      authorizer: new TokenAuthorizer(this, 'WebhookTokenAuthorizer', {
-        handler: new NodejsFunction(this, 'LeanWebhookTokenAuthorizer', {
-            entry: path.join(__dirname, '/lambda/webhook/authorizer.ts'),
-            handler: 'handler',
-            bundling: {
-              sourceMap: true,
-              sourceMapMode: SourceMapMode.INLINE
-            }
-        }),
-        identitySource: IdentitySource.header('Authorization')
-      })
+      authorizer: this.webhookAuthorizer,
+      authorizationType: AuthorizationType.CUSTOM,
     });
 
     this.webhookApiUsagePlan = this.api.addUsagePlan('SampleAppWebhookUsagePlan', {
@@ -143,6 +150,7 @@ export class AwsSampleStack extends Stack {
 
     this.webhookApiUsagePlan.applyRemovalPolicy(RemovalPolicy.DESTROY);
     this.webhookApi.applyRemovalPolicy(RemovalPolicy.DESTROY);
+    this.webhookAuthorizer.applyRemovalPolicy(RemovalPolicy.DESTROY);
   }
 
   createOutputs() {

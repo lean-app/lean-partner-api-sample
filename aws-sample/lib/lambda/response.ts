@@ -33,7 +33,7 @@ export const response = (statusCode: number, body?: any, options?: ResponseOptio
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
       'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Allow-Headers': [ "Authorization", "Content-Type", "Referrer", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token", "X-Amz-User-Agent" ].join(',')
+      'Access-Control-Allow-Headers': [ "Authorization", "Content-Type", "Referrer", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token", "X-Amz-User-Agent", "X-Lean-Signature" ].join(',')
     },
     isBase64Encoded: false,
   };
