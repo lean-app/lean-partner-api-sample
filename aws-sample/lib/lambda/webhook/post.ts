@@ -1,10 +1,12 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { Temporal } from "@js-temporal/polyfill";
-import { APIGatewayProxyEventV2 } from "aws-lambda";
+import { APIGatewayEventRequestContext, APIGatewayProxyEventV2 } from "aws-lambda";
 import { ulid } from "ulid";
 import { response } from "../response";
 
-export const handler = async (event: APIGatewayProxyEventV2) => {
+export const handler = async (event: APIGatewayProxyEventV2, context: any) => {
+  context.callbackWaitsForEmptyEventLoop = true;
+
   const instant = Temporal.Now.instant();
   const partition = instant.round('hour').epochMilliseconds.toString();
 
@@ -40,10 +42,10 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
           'S': `${eventType}#${ulid()}`
         }, 
         ...attributes
-      }
+      },
     });
 
-    await client.send(command);
+    client.send(command);
     return response(201);
   } catch (error) {
     console.log(error);
