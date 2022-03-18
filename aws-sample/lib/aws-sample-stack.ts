@@ -1,11 +1,12 @@
 import * as path from 'path';
 
 import { CfnOutput, Duration, Fn, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
-import { IApiKey, Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi, TokenAuthorizer, UsagePlan, IdentitySource, RequestAuthorizer, AuthorizationType, IAuthorizer } from 'aws-cdk-lib/aws-apigateway';
+import { IApiKey, Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi, TokenAuthorizer, UsagePlan, IdentitySource, RequestAuthorizer, AuthorizationType, IAuthorizer, Model, JsonSchemaType, RequestValidator } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { StaticWebsiteStack } from './stacks/StaticWebsite';
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { throws } from 'assert';
 
 const createLambdaIntegration = (scope: Construct, { function: functionOptions, integration: integrationOptions }: {
   function: {
@@ -162,11 +163,33 @@ export class AwsSampleStack extends Stack {
       function: {
         name: 'PostWebhook',
         path: '/lambda/webhook/post.ts',
-        process: (fn: NodejsFunction) => this.table.grantReadWriteData(fn)
+        process: (fn: NodejsFunction) => this.table.grantWriteData(fn)
       }
     }), {
       authorizer: this.webhookAuthorizer,
       authorizationType: AuthorizationType.CUSTOM,
+      requestValidator: new RequestValidator(this, 'WebhookRequestValidator', {
+        restApi: this.webhookApi,
+        validateRequestBody: true
+      }), 
+      requestModels: {
+        'application/json': new Model(this, 'WebhookJSONEventModel', {
+          contentType: 'application/json',
+          restApi: this.webhookApi,
+          schema: {
+            type: JsonSchemaType.OBJECT,
+            properties: {
+              event: {
+                type: JsonSchemaType.STRING,
+                pattern: '/.+\\..+/'
+              },
+              data: {
+                type: JsonSchemaType.OBJECT
+              }
+            }
+          }
+        })
+      }
     });
 
     this.webhookApiUsagePlan = this.api.addUsagePlan('SampleAppWebhookUsagePlan', {

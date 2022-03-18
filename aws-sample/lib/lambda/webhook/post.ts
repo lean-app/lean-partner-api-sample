@@ -1,11 +1,10 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { Temporal } from "@js-temporal/polyfill";
-import { APIGatewayEventRequestContext, APIGatewayProxyEventV2 } from "aws-lambda";
-import { ulid } from "ulid";
+import { APIGatewayProxyEvent, Context } from "aws-lambda";
 import { response } from "../response";
 
-export const handler = async (event: APIGatewayProxyEventV2, context: any) => {
-  context.callbackWaitsForEmptyEventLoop = true;
+export const handler = async (event: APIGatewayProxyEvent, context: Context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
 
   const instant = Temporal.Now.instant();
   const partition = instant.round('hour').epochMilliseconds.toString();
@@ -25,11 +24,10 @@ export const handler = async (event: APIGatewayProxyEventV2, context: any) => {
       return response(400);
     }
 
-    const attributes: { [key: string]: { 'S': string } } = Object.entries(data)
-      .reduce((attributes, [k, v]) => ({
-        ...attributes,
-        [k]: { 'S': JSON.stringify(v) }
-      }), { });
+    const attributes: { [key: string]: { 'S': string } } = { };
+    for (const k of Object.keys(data)) {
+      attributes[k] = { 'S': JSON.stringify(data[k]) };
+    }
 
     const client = new DynamoDBClient({ });
     const command = new PutItemCommand({
@@ -39,10 +37,11 @@ export const handler = async (event: APIGatewayProxyEventV2, context: any) => {
           'S': `EVENT#${partition}`
         },
         sk: {
-          'S': `${eventType}#${ulid()}`
+          'S': `LEAN#${eventType}#${event.requestContext.requestTimeEpoch}#${event.requestContext.requestId}`
         }, 
         ...attributes
       },
+      
     });
 
     client.send(command);
