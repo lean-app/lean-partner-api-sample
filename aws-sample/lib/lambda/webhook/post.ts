@@ -9,16 +9,11 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context) => 
   const instant = Temporal.Now.instant();
   const partition = instant.round('hour').epochMilliseconds.toString();
 
-  if (!event.body) {
-    return response(400);
-  }
-
   try {
-    const body = JSON.parse(event.body);
     const { 
       event: eventType, 
       data 
-    } = (body as { [key: string]: any }) ?? { };
+    } = JSON.parse(event.body ?? '{ }') ?? { } as { [key: string]: any };
 
     if (typeof eventType !== 'string' || typeof data !== 'object') {
       return response(400);

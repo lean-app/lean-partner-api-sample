@@ -2,31 +2,18 @@ import { APIGatewayAuthorizerResult, APIGatewayRequestAuthorizerEvent, APIGatewa
 import { createHmac } from 'crypto';
 import { webhookSecret } from '../../../config';
 
-const generatePolicy = (principalId: string, effect: string, resource: string): APIGatewayAuthorizerResult => {
-  if (effect && resource) {
-      const policyDocument = {
-        Version: '2012-10-17',
-        Statement: [{
-          Action: 'execute-api:Invoke',
-          Effect: effect,
-          Resource: resource,
-        }],
-      };
-
-      return {
-        principalId,
-        policyDocument
-      };
+const generatePolicy = (principalId: string, effect: string, resource: string): APIGatewayAuthorizerResult => ({
+  principalId,
+  policyDocument: {
+    Version: '2012-10-17',
+    Statement: (effect && resource) ? [
+      {
+      Action: 'execute-api:Invoke',
+      Effect: effect,
+      Resource: resource,
+    }] : [],
   }
-
-  return { 
-    principalId, 
-    policyDocument: {
-      Version: '2012-10-17',
-      Statement: []
-    }
-  };
-}
+})
 
 export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewayTokenAuthorizerEvent) => {
   try {

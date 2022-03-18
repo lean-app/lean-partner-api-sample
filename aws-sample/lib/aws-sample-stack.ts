@@ -181,7 +181,7 @@ export class AwsSampleStack extends Stack {
             properties: {
               event: {
                 type: JsonSchemaType.STRING,
-                pattern: '/.+\\..+/'
+                pattern: '.+\\..+'
               },
               data: {
                 type: JsonSchemaType.OBJECT
