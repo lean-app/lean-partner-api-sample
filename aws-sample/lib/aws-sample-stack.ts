@@ -163,7 +163,7 @@ export class AwsSampleStack extends Stack {
       function: {
         name: 'PostWebhook',
         path: '/lambda/webhook/post.ts',
-        process: (fn: NodejsFunction) => this.table.grantWriteData(fn)
+        process: (fn: NodejsFunction) => this.table.grantReadWriteData(fn)
       }
     }), {
       authorizer: this.webhookAuthorizer,
