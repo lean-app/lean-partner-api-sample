@@ -6,7 +6,6 @@ import { response } from "../response";
 export const handler = async (event: APIGatewayProxyEvent, context: Context) => {
   context.callbackWaitsForEmptyEventLoop = false;
   const instant = Temporal.Now.instant();
-  const partition = instant.round('hour').epochMilliseconds.toString();
 
   setTimeout(async () => {
     try {
@@ -15,6 +14,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context) => 
         data 
       } = JSON.parse(event.body ?? '{ }') ?? { } as { [key: string]: any };
 
+      const partition = instant.round('hour').epochMilliseconds.toString();
       const attributes: { [key: string]: { 'S': string } } = { };
       for (const key of Object.keys(data)) {
         attributes[key] = { 'S': JSON.stringify(data[key]) };
