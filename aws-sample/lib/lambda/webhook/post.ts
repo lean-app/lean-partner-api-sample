@@ -1,4 +1,4 @@
-
+import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { Temporal } from "@js-temporal/polyfill";
 import { APIGatewayProxyEvent, Context } from "aws-lambda";
 import { response } from "../response";
@@ -8,13 +8,12 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context) => 
   const instant = Temporal.Now.instant();
 
   setTimeout(async () => {
-    const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
-    
     try {
       const { 
         event: eventType, 
         data 
       } = JSON.parse(event.body ?? '{ }') ?? { } as { [key: string]: any };
+
 
       const partition = instant.round('hour').epochMilliseconds.toString();
       const attributes: { [key: string]: { 'S': string } } = { };
