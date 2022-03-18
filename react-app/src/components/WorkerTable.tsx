@@ -67,7 +67,6 @@ const toRowDefs = (worker: any) => {
                                 type: GET_CUSTOMER,
                                 params: id
                             }).then((customerData) => {
-                                console.log(customerData)
                                 if (customerData.message) {
                                     toast(customerData.message);
                                     return;
@@ -106,7 +105,6 @@ export const WorkerTable = () => {
                 type: GET_CUSTOMER,
                 params: worker.id
             }).then((customerData) => {
-                console.log(customerData)
                 if (customerData.message) {
                     toast(customerData.message);
                     return;
@@ -118,7 +116,7 @@ export const WorkerTable = () => {
                 }
 
                 WorkerStore.update(
-                    updateEntities(id, (entity) => {
+                    updateEntities(worker.id, (entity) => {
                         if (customerData.status === 'ACTIVE' && worker.paymentMethod !== 'lean') {
                             entity.paymentMethod = 'lean';
                         }

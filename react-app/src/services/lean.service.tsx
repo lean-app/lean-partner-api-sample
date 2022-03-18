@@ -16,12 +16,15 @@ const request = (method: string, path: string, options?: {
         ...(options?.headers ?? { })
     },
     method,
-}).then(response => response.json())
+}).then(async (response) => ({
+    status: response.status,
+    data: await response.json()
+}));
 
 const handlers: { [key: string]: Function } = {
-    [GET_CUSTOMERS]: () => request('GET', '/customers'),
-    [GET_CUSTOMER]: (customerId: string) => request('GET', `/customers/${customerId}`),
-    [INVITE_CUSTOMER]: (customer: any) => request('POST', `/customers`, {
+    [GET_CUSTOMERS]: () => request('GET', 'customers'),
+    [GET_CUSTOMER]: (customerId: string) => request('GET', `customers/${customerId}`),
+    [INVITE_CUSTOMER]: (customer: any) => request('POST', `customers`, {
         body: JSON.stringify(customer)
     })
 }

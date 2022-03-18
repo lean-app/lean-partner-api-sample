@@ -120,7 +120,66 @@ export class AwsSampleStack extends Stack {
         path: '/lambda/api/customers/post.ts',
       }
     }), {
-      apiKeyRequired: true 
+      apiKeyRequired: true,
+      requestValidator: new RequestValidator(this, 'PostCustomerRequestValidator', {
+        restApi: this.api,
+        validateRequestBody: true
+      }), 
+      requestModels: {
+        'application/json': new Model(this, 'PostCustomerJSONEventModel', {
+          contentType: 'application/json',
+          restApi: this.api,
+          schema: {
+            type: JsonSchemaType.OBJECT,
+            properties: {
+              partnerUserId: {
+                type: JsonSchemaType.STRING,
+              },
+              firstName: {
+                type: JsonSchemaType.STRING,
+              },
+              middleName: {
+                type: JsonSchemaType.STRING,
+              },
+              lastName: {
+                type: JsonSchemaType.STRING,
+              },
+              email: {
+                type: JsonSchemaType.STRING,
+              },
+              street: {
+                type: JsonSchemaType.STRING,
+              },
+              city: {
+                type: JsonSchemaType.STRING,
+              },
+              state: {
+                type: JsonSchemaType.STRING,
+              },
+              postalCode: {
+                type: JsonSchemaType.STRING,
+              },
+              phoneNumber: {
+                type: JsonSchemaType.STRING,
+              },
+              birthday: {
+                type: JsonSchemaType.STRING,
+              },
+            },
+            required: [
+              'firstName',
+              'lastName',
+              'email',
+              'street',
+              'city',
+              'state',
+              'postalCode',
+              'phoneNumber',
+              'birthday',
+            ]
+          }
+        })
+      }
     });
 
     this.apiUsagePlan = this.api.addUsagePlan('SampleAppUsagePlan', {
@@ -163,7 +222,7 @@ export class AwsSampleStack extends Stack {
       function: {
         name: 'PostWebhook',
         path: '/lambda/webhook/post.ts',
-        process: (fn: NodejsFunction) => this.table.grantReadWriteData(fn)
+        process: (fn: NodejsFunction) => this.table.grantWriteData(fn)
       }
     }), {
       authorizer: this.webhookAuthorizer,

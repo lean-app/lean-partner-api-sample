@@ -36,13 +36,16 @@ export const InviteWorkerModal = ({ worker, closeModal }: { worker: any, closeMo
       partnerUserId: worker.id
     }
   }).then((result) => {
-    if (result.message) {
-      return Promise.reject(result.message)
+    if (result.status !== 201) {
+      throw new Error(result.data.message);
     }
     
     toast('Worker invite sent!');
     closeModal();
-  }).catch((error) => toast(error));
+  }).catch((error) => {
+    console.error(error)
+    toast(error.message);
+  });
 
   return (
     <Form onSubmit={(e) => [e.preventDefault(), submit()]}>

@@ -2,14 +2,9 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 
 import { response } from "../../response";
 import CustomerService, { CREATE_CUSTOMER } from "../../services/customers.service";
+import { CustomerApiError } from "../../services/customers/api";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-    if (!event.body) {
-        return response(400);
-    }
-
-    console.log(event.body);
-    
     try {
         const { 
             partnerUserId,
@@ -23,7 +18,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
             postalCode,
             phoneNumber,
             birthday
-        } = JSON.parse(event.body) as { [key: string]: any };
+        } = JSON.parse(event.body ?? '{ }') as { [key: string]: any };
 
         const params = {
             customer: {
@@ -50,9 +45,12 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         });
         
         return response(201, result);
-
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
+        if (error instanceof CustomerApiError) {
+            return response(error.status, { message: error.message })
+        }
+
         return response(500);
     }
 }
