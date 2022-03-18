@@ -7,15 +7,17 @@ import { response } from "../response";
 export const handler = async (event: APIGatewayProxyEventV2) => {
   const instant = Temporal.Now.instant();
   const partition = instant.round('hour').epochMilliseconds.toString();
+
   if (!event.body) {
     return response(400);
   }
 
   try {
+    const body = JSON.parse(event.body);
     const { 
       event: eventType, 
       data 
-    } = JSON.parse(event.body) as { [key: string]: any };
+    } = (body as { [key: string]: any }) ?? { };
 
     if (typeof eventType !== 'string' || typeof data !== 'object') {
       return response(400);
@@ -24,9 +26,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     const attributes: { [key: string]: { 'S': string } } = Object.entries(data)
       .reduce((attributes, [k, v]) => ({
         ...attributes,
-        [k]: {
-          'S': JSON.stringify(v)
-        }
+        [k]: { 'S': JSON.stringify(v) }
       }), { });
 
     const client = new DynamoDBClient({ });
@@ -38,7 +38,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         },
         sk: {
           'S': `${eventType}#${ulid()}`
-        },
+        }, 
         ...attributes
       }
     });

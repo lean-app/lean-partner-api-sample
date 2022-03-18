@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, Fn, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { IApiKey, Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi, TokenAuthorizer, UsagePlan, IdentitySource, RequestAuthorizer, AuthorizationType, IAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
@@ -11,9 +11,11 @@ const createLambdaIntegration = (scope: Construct, { function: functionOptions, 
   function: {
     name: string,
     path: string,
+    process?: (fn: NodejsFunction) => any
   }, 
   integration?: LambdaIntegrationOptions
-}) => new LambdaIntegration(new NodejsFunction(scope, functionOptions.name, {
+}) => {
+  const fn = new NodejsFunction(scope, functionOptions.name, {
     entry: path.join(__dirname, functionOptions.path),
     handler: 'handler',
     bundling: {
@@ -21,7 +23,12 @@ const createLambdaIntegration = (scope: Construct, { function: functionOptions, 
       sourceMapMode: SourceMapMode.INLINE
     },
     timeout: Duration.seconds(10),
-  }), integrationOptions);
+  });
+
+  functionOptions.process?.(fn);
+
+  return new LambdaIntegration(fn, integrationOptions);
+};
 
 export class AwsSampleStack extends Stack {
   api: RestApi;
@@ -36,7 +43,15 @@ export class AwsSampleStack extends Stack {
   client: StaticWebsiteStack;
   outputs: CfnOutput[] = [];
 
-  table: Table;
+  _table: Table;
+  get table(): Table {
+    if (this._table instanceof Table) {
+      return this._table;
+    }
+    
+    this.createDynamoTable();
+    return this._table;
+  };
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -54,7 +69,7 @@ export class AwsSampleStack extends Stack {
   }
 
   createDynamoTable() {
-    this.table = new Table(this, 'PartnerTable', {
+    this._table = new Table(this, 'PartnerTable', {
       tableName: 'PartnerTable',
       partitionKey: {
         name: 'pk',
@@ -147,6 +162,7 @@ export class AwsSampleStack extends Stack {
       function: {
         name: 'PostWebhook',
         path: '/lambda/webhook/post.ts',
+        process: (fn: NodejsFunction) => this.table.grantReadWriteData(fn)
       }
     }), {
       authorizer: this.webhookAuthorizer,
