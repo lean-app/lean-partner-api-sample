@@ -39,7 +39,7 @@ const headerCellDefs = [
 ];
 
 const toRowDefs = (worker: any) => {
-    const { id, name, paymentMethod } = worker;
+    const { id, name, paymentMethod, status } = worker;
 
     return ({ id, 
         cellDefs: [
@@ -60,7 +60,7 @@ const toRowDefs = (worker: any) => {
                 width: '20%',
                 content: (
                     <div className="worker-table-item-actions">
-                        {paymentMethod !== 'lean' && <Button onClick={() => WorkerStore.update(setActiveId(id))}>Invite</Button>}
+                        {(paymentMethod !== 'lean' && status === 'NEW') && <Button onClick={() => WorkerStore.update(setActiveId(id))}>Invite</Button>}
                         <Button>Delivery</Button>
                         <Button onClick={() => {
                             Lean.perform({
@@ -104,20 +104,20 @@ export const WorkerTable = () => {
             Lean.perform({
                 type: GET_CUSTOMER,
                 params: worker.id
-            }).then((customerData) => {
-                if (customerData.message) {
-                    toast(customerData.message);
+            }).then(({ status, data }) => {
+                if (status !== 200) {
+                    toast(data.message);
                     return;
                 }
                 
                 toast("Worker refreshed!");
-                if (customerData.updatedAt <= worker.updatedAt) {
+                if (data.updatedAt <= worker.updatedAt) {
                     return;
                 }
 
                 WorkerStore.update(
                     updateEntities(worker.id, (entity) => {
-                        if (customerData.status === 'ACTIVE' && worker.paymentMethod !== 'lean') {
+                        if (data.status === 'ACTIVE' && worker.paymentMethod !== 'lean') {
                             entity.paymentMethod = 'lean';
                         }
 
@@ -143,7 +143,8 @@ export const WorkerTable = () => {
             state: 'CA',
             postalCode: '90000',
             phoneNumber: `${`${Math.random()}`.substring(2, 5)}-${ `${Math.random()}`.substring(2, 5)}-${`${Math.random()}`.substring(2, 6)}`,
-            birthday: '1990-09-19'
+            birthday: '1990-09-19',
+            status: 'NEW'
         })));
     });
 

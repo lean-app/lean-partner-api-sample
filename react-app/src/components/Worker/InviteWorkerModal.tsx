@@ -1,3 +1,4 @@
+import { setEntities, updateEntities } from '@ngneat/elf-entities';
 import { useState } from 'react';
 
 import Button from 'react-bootstrap/Button';
@@ -6,6 +7,37 @@ import Form from 'react-bootstrap/Form';
 import { toast } from 'react-toastify';
 
 import Lean, { INVITE_CUSTOMER } from '../../services/lean.service';
+import WorkerStore from '../../stores/worker.store';
+
+const submit = (worker: {
+  firstName: string,
+  middleName: string,
+  lastName: string,
+  email: string,
+  street: string,
+  city: string,
+  state: string,
+  postalCode: string,
+  phoneNumber: string,
+  birthday: string,
+  partnerUserId: string
+}) => Lean.perform({
+  type: INVITE_CUSTOMER,
+  params: worker
+}).then((result) => {
+  if (result.status !== 201) {
+    throw new Error(result.data.message);
+  }
+  
+  WorkerStore.update(updateEntities(worker.partnerUserId, {
+    invited: true
+  }));
+  
+  toast('Worker invite sent!');
+}).catch((error) => {
+  console.error(error)
+  toast(error.message);
+});
 
 export const InviteWorkerModal = ({ worker, closeModal }: { worker: any, closeModal: () => void }) => {
   const [workerFirstName, workerMiddleOrLastName, workerLastName] = (worker?.name ?? '').split(' ');
@@ -20,9 +52,8 @@ export const InviteWorkerModal = ({ worker, closeModal }: { worker: any, closeMo
   const [phoneNumber, setPhoneNumber] = useState(worker?.phoneNumber ?? '');
   const [birthday, setBirthday] = useState(worker?.birthday ?? '');
 
-  const submit = () => Lean.perform({
-    type: INVITE_CUSTOMER,
-    params: {
+  return (
+    <Form onSubmit={(e) => [e.preventDefault(), submit({
       firstName,
       middleName,
       lastName,
@@ -34,21 +65,7 @@ export const InviteWorkerModal = ({ worker, closeModal }: { worker: any, closeMo
       phoneNumber,
       birthday,
       partnerUserId: worker.id
-    }
-  }).then((result) => {
-    if (result.status !== 201) {
-      throw new Error(result.data.message);
-    }
-    
-    toast('Worker invite sent!');
-    closeModal();
-  }).catch((error) => {
-    console.error(error)
-    toast(error.message);
-  });
-
-  return (
-    <Form onSubmit={(e) => [e.preventDefault(), submit()]}>
+    }).then(closeModal)]}>
       <Card>
         <Card.Header>
           <Card.Title>Invite Worker</Card.Title>
