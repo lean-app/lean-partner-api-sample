@@ -2,6 +2,7 @@ import { Cors } from "aws-cdk-lib/aws-apigateway";
 
 const defaultResponses: { [key: number]: { message: string } } = {
   200: ({ message: 'Success' }),
+  201: ({ message: 'Created' }),
   400: ({ message: 'Bad Request' }),
   404: ({ message: 'Not Found' }),
   500: ({ message: 'Internal Server Error' }),
@@ -18,9 +19,9 @@ export interface Response {
 
 export interface ResponseOptions {
   minify?: boolean,
-  log?: boolean | ((value: Response) => void)
-}
-
+  log?: boolean | ((value: Response) => void),
+  headers?: { [key: string]: string }
+};
 
 export const response = (statusCode: number, body?: any, options?: ResponseOptions): Response => {
   const responseBody = typeof body === 'undefined' ?  defaultBody(statusCode) : body;
@@ -29,7 +30,7 @@ export const response = (statusCode: number, body?: any, options?: ResponseOptio
   const response = {
     statusCode,
     body: responseBodyValue,
-    headers: {
+    headers: options?.headers ?? {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': Cors.ALL_METHODS.join(','),
       'Access-Control-Allow-Credentials': 'true',

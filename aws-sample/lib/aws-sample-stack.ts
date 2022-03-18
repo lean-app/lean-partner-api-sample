@@ -5,6 +5,7 @@ import { IApiKey, Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi, To
 import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { StaticWebsiteStack } from './stacks/StaticWebsite';
+import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
 
 const createLambdaIntegration = (scope: Construct, { function: functionOptions, integration: integrationOptions }: {
   function: {
@@ -35,6 +36,8 @@ export class AwsSampleStack extends Stack {
   client: StaticWebsiteStack;
   outputs: CfnOutput[] = [];
 
+  table: Table;
+
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
@@ -50,6 +53,20 @@ export class AwsSampleStack extends Stack {
     });
   }
 
+  createDynamoTable() {
+    this.table = new Table(this, 'PartnerTable', {
+      tableName: 'PartnerTable',
+      partitionKey: {
+        name: 'pk',
+        type: AttributeType.STRING
+      },
+      sortKey: {
+        name: 'sk',
+        type: AttributeType.STRING
+      }
+    });
+  }
+  
   createAPI() {
     /* API and Stack */
     this.api = new RestApi(this, 'InternalRestApi', { 
@@ -119,10 +136,10 @@ export class AwsSampleStack extends Stack {
           bundling: {
             sourceMap: true,
             sourceMapMode: SourceMapMode.INLINE
-          }
+          },
       }),
       identitySource: IdentitySource.header('x-lean-signature'),
-      resultsCacheTtl: Duration.minutes(0)
+      resultsCacheTtl: Duration.minutes(0),
     });
 
 
