@@ -1,18 +1,15 @@
 import { createStore } from '@ngneat/elf';
-import { withActiveId, withEntities } from '@ngneat/elf-entities';
+import { withActiveId, withEntities, withUIEntities } from '@ngneat/elf-entities';
 import {
   persistState,
-  localStorageStrategy,
-  sessionStorageStrategy,
+  localStorageStrategy
 } from '@ngneat/elf-persist-state';
-interface Worker { 
-  id: string, 
-  [key: string]: any
-};
+import { Worker, WorkerUI } from '../types/Worker';
 
 const workerStore = createStore(
   { name: 'workers' },
   withEntities<Worker>(),
+  withUIEntities<WorkerUI>(),
   withActiveId()
 );
 
