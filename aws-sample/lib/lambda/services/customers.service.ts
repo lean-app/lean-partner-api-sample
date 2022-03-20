@@ -27,15 +27,24 @@ export interface Result {
 };
 
 
-const perform = async ({ type, params, options }: APIAction, cb?: Function): Promise<Result> => {
-    const { log = 'ALL', logger: userLogger = defaultLogger } = options ?? {};
+const perform = async (typeOrAction: string | APIAction, cb?: Function): Promise<Result> => {
+    let handler: Function;
+    let action: APIAction;
+
+    if (typeof typeOrAction === 'string') {
+        handler = handlers[typeOrAction];
+        action = { type: typeOrAction };
+    } else {
+        action = typeOrAction;
+        handler = handlers[action.type];
+    }
+
+    const { log = 'ALL', logger: userLogger = defaultLogger } = action.options ?? { };
     const logger = {
         next: undefined,
         error: undefined,
         ...userLogger
     };
-
-    const handler: Function = handlers[type];
 
     if (!handler) {
         logger.error?.('Handler not implemented.');
@@ -43,11 +52,11 @@ const perform = async ({ type, params, options }: APIAction, cb?: Function): Pro
     }
 
     try {
-        const data = await handler(params);
+        const data = await handler(action.params);
         const result = { data };
 
         if (log === 'ALL') {
-            logger.next?.({ type, params, data });
+            logger.next?.({ action, data });
         }
 
         cb?.(result);
@@ -56,7 +65,7 @@ const perform = async ({ type, params, options }: APIAction, cb?: Function): Pro
         const error = e instanceof Error ? e : new Error(e);
 
         if (log !== 'NONE') {
-            logger.error?.({ type, params, error });
+            logger.error?.({ action, error });
         }
 
         const result = { error };

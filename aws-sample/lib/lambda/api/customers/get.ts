@@ -5,9 +5,7 @@ import CustomerService, { GET_CUSTOMERS } from '../../services/customers.service
 
 export const handler = async (event: APIGatewayProxyEvent) => {
     try {
-        const result = await CustomerService.perform({
-            type: GET_CUSTOMERS
-        });
+        const result = await CustomerService.perform(GET_CUSTOMERS);
 
         return response(200, result)
     } catch (error) {
