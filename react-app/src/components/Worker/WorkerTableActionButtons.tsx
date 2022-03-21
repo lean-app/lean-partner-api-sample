@@ -15,8 +15,9 @@ export const WorkerActionButton = ({ worker }: { worker: Worker }) => {
         {worker.invited && <Button onClick={() => invite(worker)}>Invite</Button>}
         <Button>Delivery</Button>
         <Button onClick={() => refresh(worker)} disabled={workerUi?.refreshing}>
-            {workerUi?.refreshing && <Spinner animation='border' />}
-            Refresh
+            {workerUi?.refreshing 
+                ? <Spinner animation='border' /> 
+                : 'Refresh'}
         </Button>
     </div>;
 };

@@ -26,7 +26,6 @@ export interface Result {
     error?: any
 };
 
-
 const perform = async (typeOrAction: string | APIAction, cb?: Function): Promise<Result> => {
     let handler: Function;
     let action: APIAction;
