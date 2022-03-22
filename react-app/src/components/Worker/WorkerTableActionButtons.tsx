@@ -12,12 +12,12 @@ export const WorkerActionButton = ({ worker }: { worker: Worker }) => {
     const [ workerUi ] = useObservable(WorkerStore.pipe(selectEntity(worker.id, { ref: UIEntitiesRef })))
 
     return <div className="worker-table-item-actions">
-        {worker.invited && <Button onClick={() => invite(worker)}>Invite</Button>}
+        { (!worker.invited) && <Button onClick={() => invite(worker)}>Invite</Button>}
         <Button>Delivery</Button>
-        <Button onClick={() => refresh(worker)} disabled={workerUi?.refreshing}>
+        { worker.invited && <Button onClick={() => refresh(worker)} disabled={workerUi?.refreshing}>
             {workerUi?.refreshing 
                 ? <Spinner animation='border' /> 
                 : 'Refresh'}
-        </Button>
+        </Button> }
     </div>;
 };

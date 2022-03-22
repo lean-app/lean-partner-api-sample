@@ -12,13 +12,14 @@ const createLambdaIntegration = (scope: Construct, { function: functionOptions, 
   function: {
     name: string,
     path: string,
-    process?: (fn: NodejsFunction) => any
+    handler?: string,
+    process?: (fn: NodejsFunction) => any,
   }, 
   integration?: LambdaIntegrationOptions
 }) => {
   const fn = new NodejsFunction(scope, functionOptions.name, {
     entry: path.join(__dirname, functionOptions.path),
-    handler: 'handler',
+    handler: functionOptions.handler ?? 'handler',
     bundling: {
       sourceMap: true,
       sourceMapMode: SourceMapMode.INLINE
@@ -266,6 +267,15 @@ export class AwsSampleStack extends Stack {
     this.webhookApiUsagePlan.applyRemovalPolicy(RemovalPolicy.DESTROY);
     this.webhookApi.applyRemovalPolicy(RemovalPolicy.DESTROY);
     this.webhookAuthorizer.applyRemovalPolicy(RemovalPolicy.DESTROY);
+
+    const ws = createLambdaIntegration(this, {
+      function: {
+        path: './lambda/api/customers/{id}/ws.ts',
+        name: 'WebsocketTriggerHandler',
+        handler: 'trigger',
+        process: (fn: NodejsFunction) => this.table.grantReadWriteData(fn)
+      }
+    })
   }
 
   createOutputs() {
