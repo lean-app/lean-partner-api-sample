@@ -1,7 +1,7 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { Temporal } from "@js-temporal/polyfill";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { trigger } from "../api/customers/{id}/ws";
+import { trigger } from "../websocket/trigger";
 import { response } from "../response";
 
 const putEvent = async (event: APIGatewayProxyEvent, instant: Temporal.Instant) => {
@@ -38,6 +38,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
   try {
     await putEvent(event, instant);
+
     return await trigger(event);
   } catch (error) {
     console.error(error);

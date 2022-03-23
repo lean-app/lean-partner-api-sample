@@ -1,9 +1,12 @@
+import { Temporal } from '@js-temporal/polyfill';
 import { apiKey, endpoint } from '../config';
 
 export const INVITE_CUSTOMER = 'InviteCustomer';
 
 export const GET_CUSTOMERS = 'GetCustomers';
 export const GET_CUSTOMER = 'GetCustomer';
+
+export const CREATE_GIG = 'CreateGig';
 
 const request = (method: string, path: string, options?: {
     body?: string,
@@ -26,6 +29,19 @@ const handlers: { [key: string]: Function } = {
     [GET_CUSTOMER]: (customerId: string) => request('GET', `customers/${customerId}`),
     [INVITE_CUSTOMER]: (customer: any) => request('POST', `customers`, {
         body: JSON.stringify(customer)
+    }),
+    [CREATE_GIG]: (gig: {
+        partnerUserId: string,
+        totalAmount: number,
+        type: string,
+        description: string,
+        gigId: string,
+        startTime: Date,
+        endTime: Date,
+        tips: number,
+        expenses: number
+    }) => request('POST', `gig`, {
+        body: JSON.stringify(gig)
     })
 }
 

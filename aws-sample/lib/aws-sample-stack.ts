@@ -1,4 +1,6 @@
 import * as path from 'path';
+import { WebSocketLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
+import { WebSocketApi } from '@aws-cdk/aws-apigatewayv2-alpha';
 
 import { CfnOutput, Duration, Fn, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { IApiKey, Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi, TokenAuthorizer, UsagePlan, IdentitySource, RequestAuthorizer, AuthorizationType, IAuthorizer, Model, JsonSchemaType, RequestValidator } from 'aws-cdk-lib/aws-apigateway';
@@ -6,20 +8,20 @@ import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { StaticWebsiteStack } from './stacks/StaticWebsite';
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
-import { throws } from 'assert';
 
-const createLambdaIntegration = (scope: Construct, { function: functionOptions, integration: integrationOptions }: {
-  function: {
-    name: string,
-    path: string,
-    handler?: string,
-    process?: (fn: NodejsFunction) => any,
-  }, 
-  integration?: LambdaIntegrationOptions
-}) => {
-  const fn = new NodejsFunction(scope, functionOptions.name, {
-    entry: path.join(__dirname, functionOptions.path),
-    handler: functionOptions.handler ?? 'handler',
+interface NodeJsFunctionOptions {
+  name: string,
+  entry: string,
+  handler?: string,
+  process?: (fn: NodejsFunction) => any,
+};
+
+const createNodeJsFunction = (scope: Construct, options: NodeJsFunctionOptions) => {
+  const { name, entry, handler = 'handler', process } = options;
+
+  const fn = new NodejsFunction(scope, name, {
+    entry: path.join(__dirname, entry),
+    handler,
     bundling: {
       sourceMap: true,
       sourceMapMode: SourceMapMode.INLINE
@@ -27,8 +29,16 @@ const createLambdaIntegration = (scope: Construct, { function: functionOptions, 
     timeout: Duration.seconds(10),
   });
 
-  functionOptions.process?.(fn);
+  process?.(fn);
 
+  return fn;
+};
+
+const createLambdaIntegration = (scope: Construct, { function: functionOptions, integration: integrationOptions }: {
+  function: NodeJsFunctionOptions, 
+  integration?: LambdaIntegrationOptions
+}) => {
+  const fn = createNodeJsFunction(scope, functionOptions);
   return new LambdaIntegration(fn, integrationOptions);
 };
 
@@ -41,6 +51,8 @@ export class AwsSampleStack extends Stack {
   webhookApiKey: IApiKey;
   webhookApiUsagePlan: UsagePlan;
   webhookAuthorizer: RequestAuthorizer;
+
+  webSocketApi: WebSocketApi;
 
   client: StaticWebsiteStack;
   outputs: CfnOutput[] = [];
@@ -99,7 +111,7 @@ export class AwsSampleStack extends Stack {
     this.api.root.getResource('customers')?.addMethod('GET', createLambdaIntegration(this, {
       function: {
         name: 'GetCustomersHandler',
-        path: '/lambda/api/customers/get.ts',
+        entry: '/lambda/api/customers/get.ts',
       }
     }), {
       apiKeyRequired: true
@@ -109,7 +121,7 @@ export class AwsSampleStack extends Stack {
     this.api.root.getResource('customers')?.getResource('{id}')?.addMethod('GET', createLambdaIntegration(this, {
       function: {
         name: 'GetCustomerHandler',
-        path: '/lambda/api/customers/{id}/get.ts',
+        entry: '/lambda/api/customers/{id}/get.ts',
       }
     }), {
       apiKeyRequired: true 
@@ -118,7 +130,7 @@ export class AwsSampleStack extends Stack {
     this.api.root.getResource('customers')?.addMethod('POST', createLambdaIntegration(this, {
       function: {
         name: 'PostCustomerHandler',
-        path: '/lambda/api/customers/post.ts',
+        entry: '/lambda/api/customers/post.ts',
       }
     }), {
       apiKeyRequired: true,
@@ -222,7 +234,7 @@ export class AwsSampleStack extends Stack {
     this.webhookApi.root.addMethod('POST', createLambdaIntegration(this, {
       function: {
         name: 'PostWebhook',
-        path: '/lambda/webhook/post.ts',
+        entry: '/lambda/webhook/post.ts',
         process: (fn: NodejsFunction) => this.table.grantWriteData(fn)
       }
     }), {
@@ -268,14 +280,22 @@ export class AwsSampleStack extends Stack {
     this.webhookApi.applyRemovalPolicy(RemovalPolicy.DESTROY);
     this.webhookAuthorizer.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
-    const ws = createLambdaIntegration(this, {
-      function: {
-        path: './lambda/api/customers/{id}/ws.ts',
-        name: 'WebsocketTriggerHandler',
-        handler: 'trigger',
-        process: (fn: NodejsFunction) => this.table.grantReadWriteData(fn)
+    this.webSocketApi = new WebSocketApi(this, 'WebsocketApi', {
+      connectRouteOptions: {
+        integration:new WebSocketLambdaIntegration('WebsocketConnectIntegration', createNodeJsFunction(this, {
+          entry: './lambda/websocket/connect.ts',
+          name: 'WebsocketConnectHandler',
+          process: (fn: NodejsFunction) => this.table.grantWriteData(fn)
+        }))
+      },
+      disconnectRouteOptions: {
+        integration: new WebSocketLambdaIntegration('WebsocketDisconnectIntegration', createNodeJsFunction(this, {
+          entry: './lambda/websocket/disconnect.ts',
+          name: 'WebsocketDisconnectHandler',
+          process: (fn: NodejsFunction) => this.table.grantWriteData(fn)
+        }))
       }
-    })
+    });
   }
 
   createOutputs() {
