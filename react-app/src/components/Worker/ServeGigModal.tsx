@@ -26,34 +26,47 @@ const submit = (gig: any) => Lean.perform({
   toast(error.message);
 });
 
+const initialState = {
+  type: 'Space Rideshare Gig',
+  description: '',
+  startDate: Temporal.Now
+    .plainDateISO()
+    .toString(),
+  startTime: Temporal.Now
+    .plainTimeISO()
+    .round('hour')
+    .toString({ smallestUnit: 'minutes' }),
+  endDate: Temporal.Now
+    .plainDateISO()
+    .toString(),
+  endTime: Temporal.Now
+  .plainTimeISO()
+  .round('hour')
+  .add({ hours: 1 })
+  .toString({ smallestUnit: 'minutes' })
+};
+
 export const ServeGigModal = ({ worker, closeModal }: { worker: any, closeModal: () => void }) => {
   const [amount, setAmount] = useState(1.14);
   const [tips, setTips] = useState(1);
   const [expenses, setExpenses] = useState(1);
-  const [type, setType] = useState('Space Rideshare Gig');
-  const [description, setDescription] = useState('');
+  const [type, setType] = useState(initialState.type);
+  const [description, setDescription] = useState(initialState.description);
 
-  const [startDate, setStartDate] = useState(Temporal.Now.plainDateISO().toString());
-  const [startTime, setStartTime] = useState(Temporal.Now.plainTimeISO().toString({
-    smallestUnit: 'minutes'
-  }));
+  const [startDate, setStartDate] = useState(initialState.startDate);
+  const [startTime, setStartTime] = useState(initialState.startTime);
+  const [endDate, setEndDate] = useState(initialState.endDate);
+  const [endTime, setEndTime] = useState(initialState.endTime);
 
-  const [endDate, setEndDate] = useState(Temporal.Now.plainDateISO().toString());
-  const [endTime, setEndTime] = useState(Temporal.Now.plainTimeISO().add({ hours: 1 }).toString({
-    smallestUnit: 'minutes'
-  }));
-
-console.log(startTime)
+  console.log((new Date).toISOString())
   return (
     <Form onSubmit={(e) => [e.preventDefault(), submit({
       partnerUserId: worker.id,
 
       type,
       description,
-      startDate,
-      startTime,
-      endDate,
-      endTime,
+      startTime: `${startDate}T${startTime}:00.000`,
+      endTime: `${endDate}T${endTime}:00.000`,
 
       totalAmount: amount + tips + expenses,
       tips,
