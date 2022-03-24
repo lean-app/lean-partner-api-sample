@@ -76,40 +76,42 @@ export const tryCreateWorkerToInvite = () => {
 };
 
 export const refresh = async (worker: Worker) => {
-  WorkerStore.update(
-    updateEntities(worker.id, {
-      refreshing: true
-    }, { ref: UIEntitiesRef }));
+  if (worker.paymentMethod === 'lean') {
+    WorkerStore.update(
+      updateEntities(worker.id, {
+        refreshing: true
+      }, { ref: UIEntitiesRef }));
 
-  const { status, data } = await Lean.perform({
-    type: GET_CUSTOMER,
-    params: worker.id
-  });
-  
-  if (status !== 200) {
-    toast(data.message);
+    const { status, data } = await Lean.perform({
+      type: GET_CUSTOMER,
+      params: worker.id
+    });
+    
+    if (status !== 200) {
+      toast(data.message);
 
-    WorkerStore.update(updateEntities(worker.id, {
-      refreshing: false
-    }, { ref: UIEntitiesRef }));
+      WorkerStore.update(updateEntities(worker.id, {
+        refreshing: false
+      }, { ref: UIEntitiesRef }));
 
-    return;
+      return;
+    }
+
+    WorkerStore.update(
+      updateEntities(worker.id, {
+        refreshing: false
+      }, { ref: UIEntitiesRef }),
+      updateEntities(worker.id, (entity) => {
+        if (data.status === 'ACTIVE' && entity.paymentMethod !== 'lean') {
+          entity.paymentMethod = 'lean';
+        }
+
+        return { ...entity, ...data,
+          name: nameForWorker({ ...entity, ...data }),
+        };
+      })
+    );
   }
-
-  WorkerStore.update(
-    updateEntities(worker.id, {
-      refreshing: false
-    }, { ref: UIEntitiesRef }),
-    updateEntities(worker.id, (entity) => {
-      if (data.status === 'ACTIVE' && entity.paymentMethod !== 'lean') {
-        entity.paymentMethod = 'lean';
-      }
-
-      return { ...entity, ...data,
-        name: nameForWorker({ ...entity, ...data }),
-      };
-    })
-  );
 
   toast("Worker refreshed!");
 };
@@ -123,29 +125,24 @@ export const showServeGigModal = (worker: Worker) => WorkerStore.update(
   }), { ref: UIEntitiesRef })
 );
 
-export const serveGig = async (worker: Worker) => {
+export const serveGig = async (worker: Worker, gig: {
+  type: string,
+  description: string,
+  startTime: string,
+  endTime: string,
+  totalAmount: number,
+  tips: number,
+  expenses: number
+}) => {
   // Internal Gig Stuff
 
   if (worker.paymentMethod === 'lean') {
-    const startTime = new Date();
-    startTime.setHours(0);
-    
-    const endTime = new Date();
-    endTime.setHours(1);
-
     await Lean.perform({
       type: CREATE_GIG,
       params: {
         partnerUserId: worker.id,
         gigId: ulid(),
-
-        totalAmount: 3.14,
-        type: "GRANT_TEST",
-        description: "testing the gig api",
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
-        tips: 1.00,
-        expenses: 1.00
+        ...gig
       }
     });
   }
