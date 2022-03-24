@@ -31,26 +31,9 @@ const parseResponse = async (response: Response) => {
     }
 };
 
-export interface CreateCustomerProps {
-    firstName: string,
-    middleName?: string,
-    lastName: string,
-    birthday: string,
-    phoneNumber: string,
-    email: EmailAddress,
-    street: string,
-    street2?: string,
-    city: string,
-    state: string,
-    postalCode: string,
-    partnerUserId: string,
-    registrationDate: string,
-    invite: boolean,
-};
-
 export const createGig = ({ gig }: { 
     gig: Gig 
-}) => fetch(partnerApi(`customer`), {
+}) => fetch(partnerApi(`gig`), {
     method: 'POST',
     body: JSON.stringify(gig, undefined, 2),
     headers: {

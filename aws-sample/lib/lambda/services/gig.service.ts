@@ -3,7 +3,7 @@ import { createGig } from "./gig/api";
 export const CREATE_GIG = 'CreateGig';
 
 const handlers: { [key: string]: Function } = {
-    [CREATE_GIG]: async (params: any) => createGig,
+    [CREATE_GIG]: async (params: any) => createGig(params),
 };
 
 const defaultLogger = {

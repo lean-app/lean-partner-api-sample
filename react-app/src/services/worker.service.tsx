@@ -112,18 +112,25 @@ export const serveGig = async (worker: Worker) => {
   // Internal Gig Stuff
   
   if (worker.paymentMethod === 'lean') {
+    const startTime = new Date();
+    startTime.setHours(0);
+    
+    const endTime = new Date();
+    endTime.setHours(1);
+
     await Lean.perform({
       type: CREATE_GIG,
       params: {
         partnerUserId: worker.id,
-        totalAmount: "3.14",
+        gigId: ulid(),
+
+        totalAmount: 3.14,
         type: "GRANT_TEST",
         description: "testing the gig api",
-        gigId: ulid(),
-        startTime: new Date(Temporal.Now.instant().subtract({ hours: 1 }).epochSeconds),
-        endTime: new Date(Temporal.Now.instant().epochSeconds),
-        tips: "1.00",
-        expenses: "1.00"
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        tips: 1.00,
+        expenses: 1.00
       }
     });
   }
