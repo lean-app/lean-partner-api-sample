@@ -43,9 +43,9 @@ const createLambdaIntegration = (scope: Construct, { function: functionOptions, 
 };
 
 export class AwsSampleStack extends Stack {
-  api: RestApi;
-  apiKey: IApiKey;
-  apiUsagePlan: UsagePlan;
+  leanApi: RestApi;
+  leanApiKey: IApiKey;
+  leanApiUsagePlan: UsagePlan;
 
   webhookApi: RestApi;
   webhookApiKey: IApiKey;
@@ -71,7 +71,7 @@ export class AwsSampleStack extends Stack {
     super(scope, id, props);
 
     this.createStaticWebsite();
-    this.createAPI();
+    this.createCustomerApi();
     this.createWebHook();
     this.createOutputs();
   }
@@ -95,10 +95,10 @@ export class AwsSampleStack extends Stack {
       }
     });
   }
-  
-  createAPI() {
+
+  createCustomerApi() {
     /* API and Stack */
-    this.api = new RestApi(this, 'InternalRestApi', { 
+    this.leanApi = new RestApi(this, 'LeanApi', { 
       defaultCorsPreflightOptions: {
         allowHeaders: Cors.DEFAULT_HEADERS,
         allowCredentials: true,
@@ -107,8 +107,8 @@ export class AwsSampleStack extends Stack {
       },
     });
 
-    this.api.root.addResource('customers');
-    this.api.root.getResource('customers')?.addMethod('GET', createLambdaIntegration(this, {
+    this.leanApi.root.addResource('customers');
+    this.leanApi.root.getResource('customers')?.addMethod('GET', createLambdaIntegration(this, {
       function: {
         name: 'GetCustomersHandler',
         entry: '/lambda/api/customers/get.ts',
@@ -117,8 +117,8 @@ export class AwsSampleStack extends Stack {
       apiKeyRequired: true
     });
 
-    this.api.root.getResource('customers')?.addResource('{id}')
-    this.api.root.getResource('customers')?.getResource('{id}')?.addMethod('GET', createLambdaIntegration(this, {
+    this.leanApi.root.getResource('customers')?.addResource('{id}')
+    this.leanApi.root.getResource('customers')?.getResource('{id}')?.addMethod('GET', createLambdaIntegration(this, {
       function: {
         name: 'GetCustomerHandler',
         entry: '/lambda/api/customers/{id}/get.ts',
@@ -127,7 +127,7 @@ export class AwsSampleStack extends Stack {
       apiKeyRequired: true 
     });
 
-    this.api.root.getResource('customers')?.addMethod('POST', createLambdaIntegration(this, {
+    this.leanApi.root.getResource('customers')?.addMethod('POST', createLambdaIntegration(this, {
       function: {
         name: 'PostCustomerHandler',
         entry: '/lambda/api/customers/post.ts',
@@ -135,13 +135,13 @@ export class AwsSampleStack extends Stack {
     }), {
       apiKeyRequired: true,
       requestValidator: new RequestValidator(this, 'PostCustomerRequestValidator', {
-        restApi: this.api,
+        restApi: this.leanApi,
         validateRequestBody: true
       }), 
       requestModels: {
         'application/json': new Model(this, 'PostCustomerJSONEventModel', {
           contentType: 'application/json',
-          restApi: this.api,
+          restApi: this.leanApi,
           schema: {
             type: JsonSchemaType.OBJECT,
             properties: {
@@ -195,23 +195,34 @@ export class AwsSampleStack extends Stack {
       }
     });
 
-    this.apiUsagePlan = this.api.addUsagePlan('SampleAppUsagePlan', {
+    /** Gig Api -- Split into microservice, proxy routes to external api */
+    this.leanApi.root.addResource('gig');
+    this.leanApi.root.getResource('gig')?.addMethod('POST', createLambdaIntegration(this, {
+      function: {
+        name: 'PostGigHandler',
+        entry: '/lambda/api/gig/post.ts',
+      }
+    }), {
+      apiKeyRequired: true
+    });
+
+    this.leanApiUsagePlan = this.leanApi.addUsagePlan('SampleAppUsagePlan', {
       throttle: {
         rateLimit: 10,
         burstLimit: 2
       }
     });
 
-    this.apiKey = this.api.addApiKey('SampleAppApiKey');
-    this.apiUsagePlan.addApiKey(this.apiKey);
-    this.apiUsagePlan.addApiStage({
-      api: this.api,
-      stage: this.api.deploymentStage,
+    this.leanApiKey = this.leanApi.addApiKey('SampleAppApiKey');
+    this.leanApiUsagePlan.addApiKey(this.leanApiKey);
+    this.leanApiUsagePlan.addApiStage({
+      api: this.leanApi,
+      stage: this.leanApi.deploymentStage,
     });
 
-    this.apiKey.applyRemovalPolicy(RemovalPolicy.DESTROY);
-    this.apiUsagePlan.applyRemovalPolicy(RemovalPolicy.DESTROY);
-    this.api.applyRemovalPolicy(RemovalPolicy.DESTROY);
+    this.leanApiKey.applyRemovalPolicy(RemovalPolicy.DESTROY);
+    this.leanApiUsagePlan.applyRemovalPolicy(RemovalPolicy.DESTROY);
+    this.leanApi.applyRemovalPolicy(RemovalPolicy.DESTROY);
   }
 
   createWebHook() {
@@ -264,7 +275,7 @@ export class AwsSampleStack extends Stack {
       }
     });
 
-    this.webhookApiUsagePlan = this.api.addUsagePlan('SampleAppWebhookUsagePlan', {
+    this.webhookApiUsagePlan = this.leanApi.addUsagePlan('SampleAppWebhookUsagePlan', {
       throttle: {
         rateLimit: 10,
         burstLimit: 2

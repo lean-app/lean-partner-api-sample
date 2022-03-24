@@ -5,7 +5,7 @@ import { ulid } from "ulid";
 import WorkerStore from "../stores/worker.store";
 import { Worker } from "../types/Worker";
 
-import Lean, { GET_CUSTOMER } from "./lean.service";
+import Lean, { CREATE_GIG, GET_CUSTOMER } from "./lean.service";
 
 import { Temporal } from '@js-temporal/polyfill';
 
@@ -107,3 +107,24 @@ export const refresh = async (worker: Worker) => {
 
   toast("Worker refreshed!");
 };
+
+export const serveGig = async (worker: Worker) => {
+  // Internal Gig Stuff
+  
+  if (worker.paymentMethod === 'lean') {
+    await Lean.perform({
+      type: CREATE_GIG,
+      params: {
+        partnerUserId: worker.id,
+        totalAmount: "3.14",
+        type: "GRANT_TEST",
+        description: "testing the gig api",
+        gigId: ulid(),
+        startTime: new Date(Temporal.Now.instant().subtract({ hours: 1 }).epochSeconds),
+        endTime: new Date(Temporal.Now.instant().epochSeconds),
+        tips: "1.00",
+        expenses: "1.00"
+      }
+    });
+  }
+}

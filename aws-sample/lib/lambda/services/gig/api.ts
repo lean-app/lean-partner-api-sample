@@ -24,7 +24,7 @@ const parseResponse = async (response: Response) => {
     if (response.status >= 200 && response.status <= 300) {
         return await response.json();
     } else {
-        throw new CustomerApiError({ 
+        throw new GigApiError({ 
             status: response.status, 
             text: await response.text() 
         });
