@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useObservable } from '@ngneat/react-rxjs';
-import { selectActiveEntity, selectAllEntities, setActiveId } from '@ngneat/elf-entities';
+import { resetActiveId, selectActiveEntity, selectAllEntities, setActiveId, UIEntitiesRef } from '@ngneat/elf-entities';
 
 import Modal from 'react-bootstrap/Modal';
 
@@ -14,6 +14,7 @@ import { WorkerActionButton } from './Worker/WorkerTableActionButtons';
 
 import { refresh, tryCreateWorkerToInvite } from '../services/worker.service';
 import { capitalCase } from 'change-case';
+import { ServeGigModal } from './Worker/ServeGigModal';
 
 const headerCellDefs = [
     {
@@ -76,6 +77,7 @@ const toRowDefs = (worker: any) => {
 export const WorkerTable = () => {
     const [workerData] = useObservable(WorkerStore.pipe(selectAllEntities()));
     const [activeWorker] = useObservable(WorkerStore.pipe(selectActiveEntity()));
+    const [activeWorkerUi] = useObservable(WorkerStore.pipe(selectActiveEntity({ ref: UIEntitiesRef })));
 
     useDidMount(() => {
         tryCreateWorkerToInvite();
@@ -88,12 +90,13 @@ export const WorkerTable = () => {
             .map(toRowDefs);
     }
 
-    const closeModal = () => WorkerStore.update(setActiveId(undefined));
+    const closeModal = () => WorkerStore.update(resetActiveId());
 
     return <>
         <Table header={{ cells: headerCellDefs }} rows={workerCells} />
-        <Modal show={activeWorker !== undefined} onHide={closeModal}>
-            <InviteWorkerModal worker={({ ...activeWorker, email: `grant+${activeWorker?.id}@withlean.com` })} closeModal={closeModal}/>
+        <Modal show={!!activeWorkerUi?.showModal} onHide={closeModal}>
+            {activeWorkerUi?.showModal === 'invite' && <InviteWorkerModal worker={({ ...activeWorker, email: `grant+${activeWorker?.id}@withlean.com` })} closeModal={closeModal}/>}
+            {activeWorkerUi?.showModal === 'gig' && <ServeGigModal worker={activeWorker} closeModal={closeModal} />}
         </Modal>
     </>;
 }

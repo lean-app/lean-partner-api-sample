@@ -1,4 +1,4 @@
-import { addEntities, setActiveId, UIEntitiesRef, updateEntities } from "@ngneat/elf-entities";
+import { addEntities, resetActiveId, setActiveId, setEntities, UIEntitiesRef, updateEntities } from "@ngneat/elf-entities";
 import { toast } from "react-toastify";
 import { ulid } from "ulid";
 
@@ -35,12 +35,18 @@ export const createWorker = (partialWorker: Partial<Worker>) => {
   return worker;
 }
 
-export const invite = async (worker: Worker) => {
+export const showInviteWorkerModal = async (worker: Worker) => {
   if (worker.status.toUpperCase() !== 'NEW') {
     throw new Error('Worker already invited.')
   }
 
-  WorkerStore.update(setActiveId(worker.id));
+  WorkerStore.update(
+    resetActiveId(),
+    setActiveId(worker.id),
+    updateEntities(worker.id, (entity) => ({ 
+      ...entity, 
+      showModal: 'invite' 
+    }), { ref: UIEntitiesRef }));
 }
 
 export const tryCreateWorkerToInvite = () => {
@@ -108,9 +114,18 @@ export const refresh = async (worker: Worker) => {
   toast("Worker refreshed!");
 };
 
+export const showServeGigModal = (worker: Worker) => WorkerStore.update(
+  resetActiveId(),
+  setActiveId(worker.id),
+  updateEntities(worker.id, (entity) => ({ 
+    ...entity, 
+    showModal: 'gig' 
+  }), { ref: UIEntitiesRef })
+);
+
 export const serveGig = async (worker: Worker) => {
   // Internal Gig Stuff
-  
+
   if (worker.paymentMethod === 'lean') {
     const startTime = new Date();
     startTime.setHours(0);

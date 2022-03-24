@@ -6,5 +6,6 @@ export interface Worker {
 
 export interface WorkerUI {
   id: string,
-  refreshing: boolean
+  refreshing: boolean,
+  showModal: 'invite' | 'gig'
 }

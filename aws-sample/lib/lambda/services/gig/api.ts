@@ -1,7 +1,6 @@
 import fetch, { Response } from 'node-fetch';
 
 import { apiKey } from '../../../../config';
-import { EmailAddress } from '../../types/email.types';
 import { Gig } from '../../types/gig.types';
 
 const API_ENDPOINT = 'https://app.staging.withlean.com/api';
