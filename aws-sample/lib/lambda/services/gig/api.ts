@@ -50,13 +50,11 @@ export interface CreateCustomerProps {
 
 export const createGig = ({ gig }: { 
     gig: Gig 
-}) => {
-    return fetch(partnerApi(`customer`), {
-        method: 'POST',
-        body: JSON.stringify(gig, undefined, 2),
-        headers: {
-            'Authorization': `Basic ${encodedCredentials}`,
-            'Content-Type': 'application/json'
-        }
-    }).then(parseResponse);
-}
+}) => fetch(partnerApi(`customer`), {
+    method: 'POST',
+    body: JSON.stringify(gig, undefined, 2),
+    headers: {
+        'Authorization': `Basic ${encodedCredentials}`,
+        'Content-Type': 'application/json'
+    }
+}).then(parseResponse);
