@@ -28,7 +28,7 @@ const submit = (gig: any) => Lean.perform({
 
 const initialState = {
   type: 'Space Rideshare Gig',
-  description: '',
+  description: 'From A to Apoapsis',
   startDate: Temporal.Now
     .plainDateISO()
     .toString(),
@@ -37,7 +37,9 @@ const initialState = {
     .round('hour')
     .toString({ smallestUnit: 'minutes' }),
   endDate: Temporal.Now
-    .plainDateISO()
+    .plainDateTimeISO()
+    .add({ hours: 1 })
+    .toPlainDate()
     .toString(),
   endTime: Temporal.Now
   .plainTimeISO()
@@ -58,7 +60,6 @@ export const ServeGigModal = ({ worker, closeModal }: { worker: any, closeModal:
   const [endDate, setEndDate] = useState(initialState.endDate);
   const [endTime, setEndTime] = useState(initialState.endTime);
 
-  console.log((new Date).toISOString())
   return (
     <Form onSubmit={(e) => [e.preventDefault(), submit({
       partnerUserId: worker.id,
@@ -68,9 +69,9 @@ export const ServeGigModal = ({ worker, closeModal }: { worker: any, closeModal:
       startTime: `${startDate}T${startTime}:00.000`,
       endTime: `${endDate}T${endTime}:00.000`,
 
-      totalAmount: amount + tips + expenses,
-      tips,
-      expenses,
+      totalAmount: (amount + tips + expenses).toFixed(2),
+      tips: tips.toFixed(2),
+      expenses: expenses.toFixed(2),
     }).then(closeModal)]}>
       <Card>
         <Card.Header>
@@ -79,7 +80,7 @@ export const ServeGigModal = ({ worker, closeModal }: { worker: any, closeModal:
         <Card.Body>
           <Form.Group>
 
-            <Form.Label >Amount</Form.Label>
+            <Form.Label>Amount</Form.Label>
             <InputGroup>
               <InputGroup.Text>$</InputGroup.Text>
               <Form.Control type="number" 
@@ -128,14 +129,22 @@ export const ServeGigModal = ({ worker, closeModal }: { worker: any, closeModal:
            
             <Form.Label>Start Time</Form.Label>
             <InputGroup>
-              <Form.Control type="date" placeholder="Start Time" defaultValue={startDate} onChange={(e) => setStartDate(e.target.value)}></Form.Control>
-              <Form.Control type="time" placeholder="Start Time" defaultValue={startTime} onChange={(e) => setStartTime(e.target.value)}></Form.Control>
+              <Form.Control type="date" 
+              defaultValue={startDate} 
+              onChange={(e) => setStartDate(e.target.value)} />
+              <Form.Control type="time" 
+              defaultValue={startTime} 
+              onChange={(e) => setStartTime(e.target.value)} />
             </InputGroup>
 
             <Form.Label>End Time</Form.Label>
             <InputGroup>
-              <Form.Control type="date" placeholder="Start Time" defaultValue={endDate} onChange={(e) => setEndDate(e.target.value)}></Form.Control>
-              <Form.Control type="time" placeholder="Start Time" defaultValue={endTime} onChange={(e) => setEndTime(e.target.value)}></Form.Control>
+              <Form.Control type="date" 
+              defaultValue={endDate} 
+              onChange={(e) => setEndDate(e.target.value)} />
+              <Form.Control type="time" 
+              defaultValue={endTime} 
+              onChange={(e) => setEndTime(e.target.value)} />
             </InputGroup>
             
           </Form.Group>

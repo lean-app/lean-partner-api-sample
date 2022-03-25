@@ -3,12 +3,12 @@ import { createGig } from "./gig/api";
 export const CREATE_GIG = 'CreateGig';
 
 const handlers: { [key: string]: Function } = {
-    [CREATE_GIG]: async (params: any) => createGig(params),
+    [CREATE_GIG]: createGig,
 };
 
 const defaultLogger = {
-    next: (value: any) => console.log(value),
-    error: (value: any) => console.error(value)
+    next: (value: any) => console.log(JSON.stringify(value, undefined, 2)),
+    error: (value: any) => console.error(JSON.stringify(value, undefined, 2))
 };
 
 export interface APIAction {

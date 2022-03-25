@@ -32,10 +32,10 @@ const handlers: { [key: string]: Function } = {
     }),
     [CREATE_GIG]: (gig: {
         partnerUserId: string,
+        gigId: string,
         totalAmount: number,
         type: string,
         description: string,
-        gigId: string,
         startTime: Date,
         endTime: Date,
         tips: number,

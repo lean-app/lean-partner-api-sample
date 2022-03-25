@@ -30,9 +30,7 @@ const parseResponse = async (response: Response) => {
     }
 };
 
-export const createGig = ({ gig }: { 
-    gig: Gig 
-}) => fetch(partnerApi(`gig`), {
+export const createGig = (gig: Gig) => fetch(partnerApi(`gig`), {
     method: 'POST',
     body: JSON.stringify(gig, undefined, 2),
     headers: {
