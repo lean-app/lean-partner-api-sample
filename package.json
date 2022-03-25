@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "react:build": "cd ./react-app && (npm run build && cd ..) || cd .. ",
+    "react:deploy": "cd ./react-app && (echo -e 'not implemented' && cd ..) || cd .. ",
+    "react:generate:config": "cd ./react-app && (echo -e 'not implemented' && cd ..) || cd .. "
   },
   "repository": {
     "type": "git",
