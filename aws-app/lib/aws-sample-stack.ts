@@ -314,8 +314,8 @@ export class AwsSampleStack extends Stack {
       new CfnOutput(this, 'ReactAppDomainName', {
         value: `${this.client.distribution.distributionDomainName}`
       }),
-      new CfnOutput(this, 'ReactAppBucketArn', {
-        value: `${this.client.bucket.bucketArn}`
+      new CfnOutput(this, 'ReactAppBucketName', {
+        value: `${this.client.bucket.bucketName}`
       }),
       new CfnOutput(this, 'InternalRestApiKeyArn', {
         value: `${this.leanApiKey.keyArn}`
