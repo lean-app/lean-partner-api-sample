@@ -5,13 +5,30 @@ import { response } from '../response';
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
 
 const _partitions: { [key: string]: (data: any) => ({ 'S': string }) } = {
-  'account.provisioned': ({ partnerUserId }: { partnerUserId: string }) => ({ 
+  'account': ({ partnerUserId }: { partnerUserId: string }) => ({ 
     'S': `WORKER#${partnerUserId.toUpperCase()}` 
+  }),
+  'customer': ({ partnerUserId }: { partnerUserId: string }) => ({ 
+    'S': `WORKER#${partnerUserId.toUpperCase()}` 
+  }),
+  'gig': ({ gigId }: { gigId: string }) => ({ 
+    'S': `GIG#${gigId.toUpperCase()}` 
+  }),
+  'specialpayment': ({ specialPaymentId }: { specialPaymentId: string }) => ({
+    'S': `PAYMENT#${specialPaymentId.toUpperCase()}`
   })
 };
 
-const partition = (eventType: string, data: any) => {
-  return _partitions[eventType]?.(data);
+const partition = ({ object, type, data }: { object: string, type?: string, data: any}) => {
+  let pk: { 'S': string };
+
+  if (type) {
+    pk = _partitions[`${object}.${type}`]?.(data);
+  } else {
+    pk = _partitions[object]?.(data);
+  }
+
+  return pk;
 };
 
 export const trigger = async (event: APIGatewayProxyEvent) => {
@@ -23,13 +40,13 @@ export const trigger = async (event: APIGatewayProxyEvent) => {
     event: eventType, 
     data 
   } = JSON.parse(event.body ?? '{ }') ?? { } as { [key: string]: any };
-
+    const [object, type] = eventType.split('.');
     const connectionsQueryCommand = new QueryCommand({
       TableName: 'PartnerTable',
-      KeyConditionExpression: `pk = :partition AND begins_with(sk, :websocketConstant)`,
+      KeyConditionExpression: `pk = :partition AND begins_with(sk, :sort)`,
       ExpressionAttributeValues: {
-        ':partition': partition(eventType, data),
-        ':websocketConstant': {
+        ':partition': partition({ object, type, data }),
+        ':sort': {
           'S': 'WEBSOCKET'
         }
       },
