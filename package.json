@@ -6,10 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "quickstart": "npm run aws:deploy && npm run react:generate:config && npm run react:deploy",
-    "aws:deploy": "cd ./aws-app && npm install && (cdk bootstrap && cdk deploy && cd ..) || cd .. ",
+    "aws:deploy": "cd ./aws-app && npm install && (cdk bootstrap && cdk deploy --outputs-file ./cdk-outputs.json && cd ..) || cd .. ",
     "react:build": "cd ./react-app && npm install && (npm run build && cd ..) || cd .. ",
-    "react:deploy": "cd ./react-app && (echo -e 'not implemented' && cd ..) || cd .. ",
-    "react:generate:config": "node ./generate-config.js"
+    "react:deploy": "",
+    "react:generate:config": "node ./react-generate-config.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/lean-app/lean-partner-api-sample#readme",
   "dependencies": {
-    "@aws-sdk/client-api-gateway": "^3.58.0"
+    "@aws-sdk/client-api-gateway": "^3.58.0",
+    "@aws-sdk/client-s3": "^3.58.0"
   }
 }

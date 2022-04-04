@@ -213,7 +213,7 @@ export class AwsSampleStack extends Stack {
       }
     });
 
-    this.leanApiKey = this.leanApi.addApiKey('SampleAppApiKey') as ApiKey;
+    this.leanApiKey = this.leanApi.addApiKey('SampleAppApiKey');
     this.leanApiUsagePlan.addApiKey(this.leanApiKey);
     this.leanApiUsagePlan.addApiStage({
       api: this.leanApi,
@@ -313,6 +313,9 @@ export class AwsSampleStack extends Stack {
     this.outputs = [
       new CfnOutput(this, 'ReactAppDomainName', {
         value: `${this.client.distribution.distributionDomainName}`
+      }),
+      new CfnOutput(this, 'ReactAppBucketArn', {
+        value: `${this.client.bucket.bucketArn}`
       }),
       new CfnOutput(this, 'InternalRestApiKeyArn', {
         value: `${this.leanApiKey.keyArn}`
