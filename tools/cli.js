@@ -1,20 +1,15 @@
 const { spawn } = require('child_process');
-const { Observable, concat } = require('rxjs');
+const { Observable } = require('rxjs');
+const { tap, reduce } = require('rxjs/operators');
 
-const handleProcessData = (observer) => (data) => observer?.next?.(data);
-const handleProcessError = (observer) => (error) => observer?.error?.(error);
+const handleProcessData = (observer) => (buffer) => observer?.next?.({ data: buffer.toString() });
+const handleProcessError = (observer) => (buffer) => observer?.next?.({ error: buffer.toString() });
 const handleProcessClose = (observer) => (code) => (code === 0 && observer?.complete?.()) || observer?.error?.(code);
 
-const command = (input, options = { silent: false }) =>  {
-  const commandParts = input.split('&&');
-  const commands = commandParts.map((command) => command.trim())
-    .map((commandString) => {
-      const [ command, ...args ] = commandString.split(' ');
-      return [ command, [ ...args ] ];
-    })
+const command = (input, options = { silent: false, verbose: false }) =>  {
+  const [ command, ...args ] = input.split(' ');
 
-
-  const call = (command, args) => new Observable((observer) => { 
+  return new Observable((observer) => { 
     const proc = spawn(command, args, {
       cwd: options?.cwd,
     });
@@ -24,16 +19,17 @@ const command = (input, options = { silent: false }) =>  {
     const processCloseHandler = handleProcessClose(observer);
 
     proc.stdout.on('data', processDataHandler);
-    proc.stderr.on('data', processErrorHandler)
+    proc.stderr.on('data', processErrorHandler);
 
     proc.on('message', processDataHandler);
     proc.on('error', processErrorHandler);
     proc.on('exit', processCloseHandler);
     proc.on('close', processCloseHandler);
     proc.on('disconnect', processCloseHandler);
-  });
-
-  return concat(...commands.map(([ command, args ]) => call(command, args)));
+  }).pipe(
+    tap(({ data, error }) => options.verbose && console.log(data || error)),
+    reduce(() => { }),
+  );
 };
 
 module.exports = {

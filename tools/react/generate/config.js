@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const fs = require('fs/promises');
 
 const { APIGatewayClient, GetApiKeyCommand } = require("@aws-sdk/client-api-gateway"); // CommonJS import
