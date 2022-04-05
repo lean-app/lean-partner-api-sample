@@ -16,3 +16,6 @@ These steps allow you to execute each step of a deployment individually
 3. `npm run react:generate:config`
 4. `npm react:build`
 5. `npm react:deploy`
+
+## Taking it down
+1. `npm run destroy`

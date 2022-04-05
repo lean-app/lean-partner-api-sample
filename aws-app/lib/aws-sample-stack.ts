@@ -83,7 +83,7 @@ export class AwsSampleStack extends Stack {
   }
 
   createDynamoTable() {
-    this._table = new Table(this, 'PartnerTable', {
+    const table = new Table(this, 'PartnerTable', {
       tableName: 'PartnerTable',
       partitionKey: {
         name: 'pk',
@@ -94,6 +94,9 @@ export class AwsSampleStack extends Stack {
         type: AttributeType.STRING
       }
     });
+    
+    table.applyRemovalPolicy(RemovalPolicy.DESTROY);
+    this._table = table;
   }
 
   createCustomerApi() {
@@ -290,23 +293,6 @@ export class AwsSampleStack extends Stack {
     this.webhookApiUsagePlan.applyRemovalPolicy(RemovalPolicy.DESTROY);
     this.webhookApi.applyRemovalPolicy(RemovalPolicy.DESTROY);
     this.webhookAuthorizer.applyRemovalPolicy(RemovalPolicy.DESTROY);
-
-    this.webSocketApi = new WebSocketApi(this, 'WebsocketApi', {
-      connectRouteOptions: {
-        integration:new WebSocketLambdaIntegration('WebsocketConnectIntegration', createNodeJsFunction(this, {
-          entry: './lambda/websocket/connect.ts',
-          name: 'WebsocketConnectHandler',
-          process: (fn: NodejsFunction) => this.table.grantWriteData(fn)
-        }))
-      },
-      disconnectRouteOptions: {
-        integration: new WebSocketLambdaIntegration('WebsocketDisconnectIntegration', createNodeJsFunction(this, {
-          entry: './lambda/websocket/disconnect.ts',
-          name: 'WebsocketDisconnectHandler',
-          process: (fn: NodejsFunction) => this.table.grantWriteData(fn)
-        }))
-      }
-    });
   }
 
   createOutputs() {
