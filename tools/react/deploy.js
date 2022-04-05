@@ -1,15 +1,4 @@
-const { exec } = require('child_process');
-
-const call = async (command, { silent = false } = { }) =>  (new Promise ((resolve, reject) => {
-  exec(command, (error, stdout, stderr) => {
-    if (error || stderr) {
-      console.error(error.trim() || stderr.trim());
-      return reject(error.trim() || stderr.trim());
-    }
-
-    return resolve(silent ? '' : stdout.trim());
-  })
-}));
+const call = require('../cli');
 
 (async () => {
   const websiteUrl = await call(`grep -o '"ReactAppDomainName": "[^"]*' ./aws-app/cdk-outputs.json | grep -o '[^"]*$'`);

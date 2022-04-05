@@ -9,8 +9,8 @@
     "destroy": "node ./destroy-app.js",
     "aws:deploy": "cd ./aws-app && npm install && (cdk bootstrap && cdk deploy --outputs-file ./cdk-outputs.json && cd ..) || cd .. ",
     "react:build": "cd ./react-app && npm install && (npm run build && cd ..) || cd .. ",
-    "react:deploy": "node ./react-deploy.js",
-    "react:generate:config": "node ./react-generate-config.js"
+    "react:deploy": "node ./tools/react-deploy.js",
+    "react:generate:config": "node ./tools/react-generate-config.js"
   },
   "repository": {
     "type": "git",
