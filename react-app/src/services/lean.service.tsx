@@ -1,5 +1,4 @@
 import { apiKey, endpoint } from '../config';
-import { Gig } from '../types/Gig';
 
 export const INVITE_CUSTOMER = 'InviteCustomer';
 
@@ -30,7 +29,7 @@ const handlers: { [key: string]: Function } = {
     [INVITE_CUSTOMER]: (customer: any) => request('POST', `customers`, {
         body: JSON.stringify(customer)
     }),
-    [CREATE_GIG]: (gig: Gig) => request('POST', `gig`, {
+    [CREATE_GIG]: (gig: any) => request('POST', `gig`, {
         body: JSON.stringify(gig)
     })
 }
