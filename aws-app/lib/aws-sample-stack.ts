@@ -303,8 +303,8 @@ export class AwsSampleStack extends Stack {
       new CfnOutput(this, 'ReactAppBucketName', {
         value: `${this.client.bucket.bucketName}`
       }),
-      new CfnOutput(this, 'InternalRestApiKeyArn', {
-        value: `${this.leanApiKey.keyArn}`
+      new CfnOutput(this, 'InternalRestApiKeyId', {
+        value: `${this.leanApiKey.keyId}`
       }),
       new CfnOutput(this, 'InternalRestApiEndpoint', {
         value: `${this.leanApi.url}`

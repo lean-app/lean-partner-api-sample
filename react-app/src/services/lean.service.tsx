@@ -1,5 +1,5 @@
-import { Temporal } from '@js-temporal/polyfill';
 import { apiKey, endpoint } from '../config';
+import { Gig } from '../types/Gig';
 
 export const INVITE_CUSTOMER = 'InviteCustomer';
 

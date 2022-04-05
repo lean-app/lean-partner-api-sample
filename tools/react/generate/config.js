@@ -1,39 +1,33 @@
 const fs = require('fs/promises');
 
-const { APIGatewayClient, GetApiKeysCommand } = require("@aws-sdk/client-api-gateway"); // CommonJS import
+const { APIGatewayClient, GetApiKeyCommand } = require("@aws-sdk/client-api-gateway"); // CommonJS import
 
-const getApiKey = async (arn) => {
+const getApiKey = async (apiKey) => {
   const client = new APIGatewayClient({ });
-  const command = new GetApiKeysCommand({
-    includeValues: true,
-    nameQuery: arn,
+  const command = new GetApiKeyCommand({
+    includeValue: true,
+    apiKey
   });
 
   const response = await client.send(command);
-  const [ apiKey ] = response.items ?? [];
-
-  return apiKey?.value;
+  return response?.value;
 }
 
 (async () => {
   const stackConfig = JSON.parse(await fs.readFile('./aws-app/cdk-outputs.json')).AwsSampleStack;
-  const configFile = await fs.access('./react-app/src/config.ts').catch((err) => { });
 
-  if (!configFile) {
-    console.info('Creating config file');
+  console.info('Creating config file');
 
-    const [ endpoint ] = Object.entries(stackConfig)
-      .filter(([key,]) => key.startsWith('InternalRestApiEndpoint'))
-      .map(([, value]) => value);
+  const endpoint = stackConfig.InternalRestApiEndpoint;
+  const apiKey = await getApiKey(stackConfig.InternalRestApiKeyId);
+  const apiKeyLine = `export const apiKey = '<API_KEY>';\n`
+      .replace('<API_KEY>', apiKey);
 
-    const apiKey = await getApiKey(stackConfig.InternalRestApiKeyArn);
-    const config = `
-      export const apiKey = '<API_KEY>';
-      export const endpoint = '<ENDPOINT>';
-    ` .replace('<API_KEY>', process.env.API_KEY ?? apiKey)
-      .replace('<ENDPOINT>', process.env.ENDPOINT ?? endpoint)
-      .trim();
+  const endpointLine = `export const endpoint = '<ENDPOINT>';\n`
+      .replace('<ENDPOINT>', endpoint);
 
-    await fs.writeFile('./react-app/src/config.ts', config);
-  }
+  await fs.writeFile('./react-app/src/config.ts', '');
+  await fs.appendFile('./react-app/src/config.ts', apiKeyLine);
+  await fs.appendFile('./react-app/src/config.ts', endpointLine);
+  await fs.appendFile('./react-app/src/config.ts', '\n');
 })();

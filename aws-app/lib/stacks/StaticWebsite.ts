@@ -22,7 +22,10 @@ export class StaticWebsiteStack extends cdk.NestedStack {
           s3BucketSource: this.bucket,
         },
         behaviors: [{
-          isDefaultBehavior: true
+          isDefaultBehavior: true,
+          defaultTtl: cdk.Duration.minutes(1),
+          minTtl: cdk.Duration.minutes(0),
+          maxTtl: cdk.Duration.minutes(5),
         }],
       }],
       errorConfigurations: [{
@@ -30,7 +33,7 @@ export class StaticWebsiteStack extends cdk.NestedStack {
         errorCachingMinTtl: 900,
         responseCode: 200,
         responsePagePath: '/index.html' 
-      }]
+      }],
     });
 
     this.applyRemovalPolicies(props?.removalPolicy);
