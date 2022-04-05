@@ -1,11 +1,16 @@
-const call = require('../cli');
+const path = require('path');
+const fs = require('fs/promises');
+
+const { command } = require('../cli');
 
 (async () => {
-  const websiteUrl = await call(`grep -o '"ReactAppDomainName": "[^"]*' ./aws-app/cdk-outputs.json | grep -o '[^"]*$'`);
-  const bucketName = await call(`grep -o '"ReactAppBucketName": "[^"]*' ./aws-app/cdk-outputs.json | grep -o '[^"]*$'`);
-  await call(`aws s3 sync ./react-app/build s3://${bucketName}`, {
-    silent: true
-  });
+  const { AwsSampleStack: {
+    ReactAppDomainName, ReactAppBucketName
+  } } = JSON.parse(await fs.readFile('./aws-app/cdk-outputs.json'));
 
-  console.log(`App Url: ${websiteUrl}`);
+  command(`aws s3 sync ${path.join(__dirname, '../../react-app')} s3://${ReactAppBucketName}`).subscribe({
+    next: (buffer) => console.log(buffer.toString()),
+    error: (err) => console.error(err),
+    complete: () => [ console.log('Deployment complete'), console.log(`App Url ${ReactAppDomainName}`) ],
+  });
 })();
