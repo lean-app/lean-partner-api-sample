@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "quickstart": "npm run aws:deploy && npm run react:generate:config && npm run react:build && npm run react:deploy",
+    "quickstart": "npm install && npm run aws:deploy && npm run react:generate:config && npm run react:build && npm run react:deploy",
     "aws:deploy": "cd ./aws-app && npm install && (cdk bootstrap && cdk deploy --outputs-file ./cdk-outputs.json && cd ..) || cd .. ",
     "react:build": "cd ./react-app && npm install && (npm run build && cd ..) || cd .. ",
     "react:deploy": "node ./react-deploy.js",
