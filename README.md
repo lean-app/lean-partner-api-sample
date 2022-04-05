@@ -1,8 +1,8 @@
 
 ## Prerequisites
-(Docker)[https://docs.docker.com/get-docker/]
-(NodeJS)[https://nodejs.org/en/download/]
-(AWS CDK)[https://docs.aws.amazon.com/cdk/v2/guide/work-with.html]
+* [Docker](https://docs.docker.com/get-docker/)
+* [NodeJS](https://nodejs.org/en/download/)
+* [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/work-with.html)
 ## Installation
 ### Quick Start
 1. Add you Lean API Key and Webhook Secret to `./aws-app/config.ts`
