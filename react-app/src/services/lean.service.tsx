@@ -30,17 +30,7 @@ const handlers: { [key: string]: Function } = {
     [INVITE_CUSTOMER]: (customer: any) => request('POST', `customers`, {
         body: JSON.stringify(customer)
     }),
-    [CREATE_GIG]: (gig: {
-        partnerUserId: string,
-        gigId: string,
-        totalAmount: number,
-        type: string,
-        description: string,
-        startTime: Date,
-        endTime: Date,
-        tips: number,
-        expenses: number
-    }) => request('POST', `gig`, {
+    [CREATE_GIG]: (gig: Gig) => request('POST', `gig`, {
         body: JSON.stringify(gig)
     })
 }
