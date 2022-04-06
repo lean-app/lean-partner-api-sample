@@ -52,8 +52,6 @@ export class AwsSampleStack extends Stack {
   webhookApiUsagePlan: UsagePlan;
   webhookAuthorizer: RequestAuthorizer;
 
-  webSocketApi: WebSocketApi;
-
   client: StaticWebsiteStack;
   outputs: CfnOutput[] = [];
 

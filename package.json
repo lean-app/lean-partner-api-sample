@@ -8,6 +8,7 @@
     "quickstart": "npm install && npm run aws:deploy && npm run react:generate:config && npm run react:build && npm run react:deploy",
     "destroy": "node ./destroy-app.js",
     "aws:deploy": "node ./tools/aws/deploy.js",
+    "react:start": "node ./tools/react/start.js",
     "react:build": "node ./tools/react/build.js",
     "react:deploy": "node ./tools/react/deploy.js",
     "react:generate:config": "node ./tools/react/generate/config.js"
