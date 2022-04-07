@@ -70,14 +70,13 @@ export const tryCreateWorkerToInvite = () => WorkerStore.pipe(
     birthday: '1990-09-19',
     status: 'NEW',
     invited: false
-  }))
-).subscribe({
-  next: ({ id }) => WorkerStore.update(updateEntities(id, (entity) => ({
+  })),
+  tap(({ id }) => WorkerStore.update(updateEntities(id, (entity) => ({
     ...entity,
     name: `${names[Math.floor(Math.random() * names.length)]} ${names[Math.floor((1 - Math.random()) * names.length)]}`,
     email: `grant+${id}@withlean.com`
-  })))
-});
+  }))))
+).subscribe();
 
 export const refresh = (worker: Worker) => of(worker).pipe(
   filter(({ invited, status }) => status !== 'NEW' || invited),

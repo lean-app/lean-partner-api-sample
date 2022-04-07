@@ -1,13 +1,12 @@
 import * as path from 'path';
-import { WebSocketLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
-import { WebSocketApi } from '@aws-cdk/aws-apigatewayv2-alpha';
 
-import { CfnOutput, Duration, Fn, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { IApiKey, Cors, LambdaIntegration, LambdaIntegrationOptions, RestApi, TokenAuthorizer, UsagePlan, IdentitySource, RequestAuthorizer, AuthorizationType, IAuthorizer, Model, JsonSchemaType, RequestValidator } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { StaticWebsiteStack } from './stacks/StaticWebsite';
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 
 interface NodeJsFunctionOptions {
   name: string,
@@ -53,6 +52,8 @@ export class AwsSampleStack extends Stack {
   webhookAuthorizer: RequestAuthorizer;
 
   client: StaticWebsiteStack;
+
+  secrets: { [key: string]: Secret };
   outputs: CfnOutput[] = [];
 
   _table: Table;
@@ -71,6 +72,8 @@ export class AwsSampleStack extends Stack {
     this.createStaticWebsite();
     this.createCustomerApi();
     this.createWebHook();
+    this.createSecrets();
+
     this.createOutputs();
   }
 
@@ -293,6 +296,20 @@ export class AwsSampleStack extends Stack {
     this.webhookAuthorizer.applyRemovalPolicy(RemovalPolicy.DESTROY);
   }
 
+  createSecrets() {
+    this.secrets.apiKeySecret = new Secret(this, 'LeanApiKeySecret', {
+      
+      secretName: 'LeanApiKeySecret',
+    });
+
+    this.secrets.webhookSecret = new Secret(this, 'LeanWebhookHMACSecret',{
+      secretName: 'LeanWebhookHMACSecret',
+    });
+
+    this.secrets.apiKeySecret.applyRemovalPolicy(RemovalPolicy.DESTROY);
+    this.secrets.webhookSecret.applyRemovalPolicy(RemovalPolicy.DESTROY);
+  }
+
   createOutputs() {
     this.outputs = [
       new CfnOutput(this, 'ReactAppDomainName', {
@@ -306,7 +323,13 @@ export class AwsSampleStack extends Stack {
       }),
       new CfnOutput(this, 'InternalRestApiEndpoint', {
         value: `${this.leanApi.url}`
-      })
+      }),
+      new CfnOutput(this, 'LeanApiKeySecretId', {
+        value: `${this.secrets.apiKeySecret.secretFullArn}`
+      }),
+      new CfnOutput(this, 'LeanWebhookSecretId', {
+        value: `${this.secrets.webhookSecret.secretFullArn}`
+      }),
     ];
   }
 }

@@ -21,7 +21,7 @@ const { command } = require('../cli');
     tap(() => !silent && console.log('Running CDK Deploy')),
     switchMap(() => awsAppFolderCommand(`cdk deploy --outputs-file ./cdk-outputs.json`)),
   ).subscribe({
-    error: (err) => console.error({ error: err.toString() }),
+    error: (error) => console.error(error),
     complete: () => !silent && console.log('AWS Deployment complete'),
   });
 })();
