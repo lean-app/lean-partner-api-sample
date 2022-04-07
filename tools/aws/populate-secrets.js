@@ -33,10 +33,11 @@ prompt('Do you want to update any secrets? (y/n) ').pipe(
     command(`aws secretsmanager describe-secret --secret-id ${LeanApiKeySecretId}`, { verbose }),
     command(`aws secretsmanager describe-secret --secret-id ${LeanWebhookSecretId}`, { verbose }),
   ).pipe(
-    map((results) => results.map(({ data }) => JSON.parse(data))),
-    map(([apiKeySecret, webhookSecret]) => {
-      const apiKeyChangeInstant = Temporal.Instant.from(apiKeySecret.LastChangedDate);
-      const webhookSecretChangeInstant = Temporal.Instant.from(webhookSecret.LastChangedDate);
+    map((results) => results
+      .map(({ data }) => JSON.parse(data))
+      .map((( {LastChangedDate }) => Temporal.Instant.from(LastChangedDate)))
+    ),
+    map(([apiKeyChangeInstant, webhookSecretChangeInstant]) => {
       const tenMinutesAgo = Temporal.Now.instant().add({ minutes: -10 });
 
       const calls = [];
