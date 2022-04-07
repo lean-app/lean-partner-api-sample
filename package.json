@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "quickstart": "npm install && npm run aws:deploy && npm run react:config:generate && npm run react:build && npm run react:deploy",
+    "quickstart": "npm install && npm run aws:deploy && npm run react:config:generate && npm run react:build && npm run react:deploy && npm run aws:secrets:populate",
     "destroy": "node ./destroy-app.js",
     "aws:deploy": "node ./tools/aws/deploy.js",
+    "aws:secrets:populate": "node ./tools/aws/populate-secrets.js",
     "react:start": "node ./tools/react/start.js",
     "react:build": "node ./tools/react/build.js",
     "react:deploy": "node ./tools/react/deploy.js",
