@@ -4,7 +4,7 @@ const yargs = require('yargs');
 
 const { Temporal } = require('@js-temporal/polyfill');
 const { Observable, from, concat, zip } = require('rxjs');
-const { map, switchMap, tap } = require('rxjs/operators');
+const { map, switchMap, tap, filter } = require('rxjs/operators');
 
 const { command } = require('../cli');
 
@@ -23,18 +23,18 @@ const prompt = (question) => new Observable((observer) => {
   });
 })
 
-from(fs.readFile('./aws-app/cdk-outputs.json', {
-  encoding: 'utf8',
-})).pipe(
+prompt('Do you want to update any secrets? (y/n) ').pipe(
+  filter((answer) => answer.toLowerCase().startsWith('y')),
+  switchMap(() => from(fs.readFile('./aws-app/cdk-outputs.json', {
+    encoding: 'utf8',
+  }))),
   map((data) => JSON.parse(data).AwsSampleStack),
   switchMap(({ LeanApiKeySecretId, LeanWebhookSecretId }) => zip(
     command(`aws secretsmanager describe-secret --secret-id ${LeanApiKeySecretId}`, { verbose }),
     command(`aws secretsmanager describe-secret --secret-id ${LeanWebhookSecretId}`, { verbose }),
   ).pipe(
-    map(([{ data: apiKeyData }, { data: webhookData }]) => {
-      const apiKeySecret = JSON.parse(apiKeyData);
-      const webhookSecret = JSON.parse(webhookData);
-
+    map((results) => results.map(({ data }) => JSON.parse(data))),
+    map(([apiKeySecret, webhookSecret]) => {
       const apiKeyChangeInstant = Temporal.Instant.from(apiKeySecret.LastChangedDate);
       const webhookSecretChangeInstant = Temporal.Instant.from(webhookSecret.LastChangedDate);
       const tenMinutesAgo = Temporal.Now.instant().add({ minutes: -10 });

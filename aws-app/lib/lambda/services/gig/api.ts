@@ -1,11 +1,12 @@
 import fetch, { Response } from 'node-fetch';
 
-import { apiKey } from '../../../../config';
 import { Gig } from '../../types/gig.types';
+import { getSecret } from '../secretsmanager.service';
 
 const API_ENDPOINT = 'https://app.staging.withlean.com/api';
 const partnerApi = (path: string) => `${API_ENDPOINT}/${path}`;
-const encodedCredentials = Buffer.from(`${apiKey}:`).toString('base64');
+const encodedCredentials = async () => Buffer.from(`${await getSecret(process.env.LEAN_API_KEY_SECRET_ID)}:`).toString('base64');
+
 
 export class GigApiError extends Error {
     status: number;
@@ -34,7 +35,7 @@ export const createGig = (gig: Gig) => fetch(partnerApi(`gig`), {
     method: 'POST',
     body: JSON.stringify(gig, undefined, 2),
     headers: {
-        'Authorization': `Basic ${encodedCredentials}`,
+        'Authorization': `Basic ${encodedCredentials()}`,
         'Content-Type': 'application/json'
     }
 }).then(parseResponse);

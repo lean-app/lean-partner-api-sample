@@ -41,6 +41,14 @@ const createLambdaIntegration = (scope: Construct, { function: functionOptions, 
   return new LambdaIntegration(fn, integrationOptions);
 };
 
+const addSecretEnvironmentVariable = (fn: NodejsFunction, { name, secret }: {
+  name: string,
+  secret: Secret
+}) => {
+  secret.grantRead(fn);
+  fn.addEnvironment(name, secret.secretFullArn ?? '');
+}
+
 export class AwsSampleStack extends Stack {
   leanApi: RestApi;
   leanApiKey: IApiKey;
@@ -53,7 +61,7 @@ export class AwsSampleStack extends Stack {
 
   client: StaticWebsiteStack;
 
-  secrets: { [key: string]: Secret };
+  secrets: { [key: string]: Secret } = { };
   outputs: CfnOutput[] = [];
 
   _table: Table;
@@ -70,9 +78,10 @@ export class AwsSampleStack extends Stack {
     super(scope, id, props);
 
     this.createStaticWebsite();
+
+    this.createSecrets();
     this.createCustomerApi();
     this.createWebHook();
-    this.createSecrets();
 
     this.createOutputs();
   }
@@ -109,13 +118,17 @@ export class AwsSampleStack extends Stack {
         allowOrigins: Cors.ALL_ORIGINS,
         allowMethods: Cors.ALL_METHODS
       },
-    });
+    });    
 
     this.leanApi.root.addResource('customers');
     this.leanApi.root.getResource('customers')?.addMethod('GET', createLambdaIntegration(this, {
       function: {
         name: 'GetCustomersHandler',
         entry: '/lambda/api/customers/get.ts',
+        process: (fn: NodejsFunction) => addSecretEnvironmentVariable(fn, { 
+          name: 'LEAN_API_KEY_SECRET_ID', 
+          secret: this.secrets.apiKeySecret 
+        })
       }
     }), {
       apiKeyRequired: true
@@ -126,6 +139,10 @@ export class AwsSampleStack extends Stack {
       function: {
         name: 'GetCustomerHandler',
         entry: '/lambda/api/customers/{id}/get.ts',
+        process: (fn: NodejsFunction) => addSecretEnvironmentVariable(fn, { 
+          name: 'LEAN_API_KEY_SECRET_ID', 
+          secret: this.secrets.apiKeySecret 
+        })
       }
     }), {
       apiKeyRequired: true 
@@ -135,6 +152,10 @@ export class AwsSampleStack extends Stack {
       function: {
         name: 'PostCustomerHandler',
         entry: '/lambda/api/customers/post.ts',
+        process: (fn: NodejsFunction) => addSecretEnvironmentVariable(fn, { 
+          name: 'LEAN_API_KEY_SECRET_ID', 
+          secret: this.secrets.apiKeySecret 
+        })
       }
     }), {
       apiKeyRequired: true,
@@ -205,6 +226,10 @@ export class AwsSampleStack extends Stack {
       function: {
         name: 'PostGigHandler',
         entry: '/lambda/api/gig/post.ts',
+        process: (fn: NodejsFunction) => addSecretEnvironmentVariable(fn, { 
+          name: 'LEAN_API_KEY_SECRET_ID', 
+          secret: this.secrets.apiKeySecret 
+        })
       }
     }), {
       apiKeyRequired: true
@@ -233,13 +258,15 @@ export class AwsSampleStack extends Stack {
     this.webhookApi = new RestApi(this, 'WebhookRestApi', { });
 
     this.webhookAuthorizer = new TokenAuthorizer(this, 'WebhookTokenAuthorizer', {
-      handler: new NodejsFunction(this, 'LeanWebhookAuthorizerFunction', {
-          entry: path.join(__dirname, '/lambda/webhook/authorizer.ts'),
-          handler: 'handler',
-          bundling: {
-            sourceMap: true,
-            sourceMapMode: SourceMapMode.INLINE
-          },
+      handler: createNodeJsFunction(this, {
+        name: 'LeanWebhookAuthorizerFunction',
+        entry: '/lambda/webhook/authorizer.ts',
+        process: (fn: NodejsFunction) => [ 
+          addSecretEnvironmentVariable(fn, { 
+            name: 'LEAN_WEBHOOK_SECRET_ID', 
+            secret: this.secrets.webhookSecret 
+          }),
+        ]
       }),
       identitySource: IdentitySource.header('x-lean-signature'),
       resultsCacheTtl: Duration.minutes(0),
