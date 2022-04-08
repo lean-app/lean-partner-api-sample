@@ -21,7 +21,20 @@ const prompt = (question) => new Observable((observer) => {
     observer.next(answer);
     observer.complete();
   });
-})
+});
+
+const tenMinutesAgo = Temporal.Now.instant().subtract({ minutes: 10 });
+const getSecretUpdatePrompt = (label, secret, { forceUpdate }) => {
+  const changeInstant = Temporal.Instant.from(secret.LastChangedDate);
+  if (!forceUpdate && !Temporal.Instant.compare(changeInstant, tenMinutesAgo) < 0) {
+    return;
+  }
+
+  return prompt(`${label}: `).pipe(
+    switchMap((userInput) => command(`aws secretsmanager put-secret-value --secret-id ${secret.ARN} --secret-string ${userInput}`, { verbose })),
+    tap(() => console.log(`${label} updated\n`)),
+  );
+};
 
 prompt('Do you want to update any secrets? (y/n) ').pipe(
   filter((answer) => answer.toLowerCase().startsWith('y')),
@@ -33,40 +46,10 @@ prompt('Do you want to update any secrets? (y/n) ').pipe(
     command(`aws secretsmanager describe-secret --secret-id ${LeanApiKeySecretId}`, { verbose }),
     command(`aws secretsmanager describe-secret --secret-id ${LeanWebhookSecretId}`, { verbose }),
   ).pipe(
-    map((results) => results
-      .map(({ data }) => JSON.parse(data))
-      .map((( {LastChangedDate }) => Temporal.Instant.from(LastChangedDate)))
-    ),
-    map(([apiKeyChangeInstant, webhookSecretChangeInstant]) => {
-      const tenMinutesAgo = Temporal.Now.instant().add({ minutes: -10 });
-
-      const calls = [];
-      if (forceUpdate || Temporal.Instant.compare(apiKeyChangeInstant, tenMinutesAgo) < 0) {
-        calls.push(
-          prompt('Enter Lean API key:\n').pipe(
-            switchMap((userInput) => command(`aws secretsmanager put-secret-value --secret-id ${LeanApiKeySecretId} --secret-string ${userInput}`, { verbose })),
-            tap(() => console.log('Api Key updated\n'))
-          )
-        );
-      } else {
-        console.log('The Api Key has been updated within the past ten minutes (https://docs.aws.amazon.com/secretsmanager/latest/userguide/reference_limits.html)');
-        console.log('Please update it in the AWS console or use the --forceUpdate flag.\n');
-      }
-
-      if (forceUpdate || Temporal.Instant.compare(webhookSecretChangeInstant, tenMinutesAgo) < 0) {
-        calls.push(
-          prompt('Enter Lean Webhook Secret:\n').pipe(
-            switchMap((userInput) => command(`aws secretsmanager put-secret-value --secret-id ${LeanWebhookSecretId} --secret-string ${userInput}`, { verbose })),
-            tap(() => console.log('Webhook Secret updated\n'))
-          )
-        );
-      } else {
-        console.log('The Webhook Secret has been updated within the past ten minutes (https://docs.aws.amazon.com/secretsmanager/latest/userguide/reference_limits.html)');
-        console.log('Please update it in the AWS console or use the --forceUpdate flag.\n');
-      }
-
-      return calls;
-    }),
-    switchMap((calls) => concat(...calls)))
-  )
+    map((results) => results.map(({ data }) => JSON.parse(data))),
+    switchMap(([apiKeySecret, webhookSecret]) => concat(...[
+      getSecretUpdatePrompt('Lean API Key', apiKeySecret, { forceUpdate }),
+      getSecretUpdatePrompt('Lean Webhook Secret', webhookSecret, { forceUpdate }),
+    ].filter((call) => !!call))),
+  ))
 ).subscribe();

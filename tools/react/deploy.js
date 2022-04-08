@@ -21,7 +21,7 @@ from(fs.readFile('./aws-app/cdk-outputs.json', {
           console.log(ReactAppBucketName)
         ]),
       ),
-    command(`aws s3 sync ./build')} s3://${ReactAppBucketName}`, {
+    command(`aws s3 sync ./build s3://${ReactAppBucketName}`, {
       cwd: path.join(__dirname, '../../react-app'),
     }).pipe(
         tap(() => !silent && console.log('Bucket synced')),
