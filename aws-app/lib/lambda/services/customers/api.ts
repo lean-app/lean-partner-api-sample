@@ -7,7 +7,7 @@ import { getSecret } from '../secretsmanager.service';
 const API_ENDPOINT = 'https://app.staging.withlean.com/api';
 const partnerApi = (path: string) => `${API_ENDPOINT}/${path}`;
 
-const encodedCredentials = async () => Buffer.from(`${await getSecret(process.env.LEAN_API_KEY_SECRET_ID)}:`).toString('base64');
+const authorizationHeader = async () => `Basic ${Buffer.from(`${await getSecret(process.env.LEAN_API_KEY_SECRET_ID)}:`).toString('base64')}`;
 export class CustomerApiError extends Error {
   status: number;
 
@@ -31,19 +31,19 @@ const parseResponse = async (response: Response) => {
   }
 };
 
-export const getCustomers = () => fetch(partnerApi(`customer`), {
+export const getCustomers = async () => await fetch(partnerApi(`customer`), {
   method: 'GET',
   headers: {
-    Authorization: `Basic ${(encodedCredentials())}`
+    Authorization: await authorizationHeader(),
   }
 }).then(parseResponse);
 
-export const getCustomer = ({ partnerUserId }: {
+export const getCustomer = async ({ partnerUserId }: {
   partnerUserId: string
-}) => fetch(partnerApi(`customer/${partnerUserId}`), {
+}) => await fetch(partnerApi(`customer/${partnerUserId}`), {
   method: 'GET',
   headers: {
-    Authorization: `Basic ${encodedCredentials()}`
+    Authorization: await authorizationHeader(),
   }
 }).then(parseResponse);
 
@@ -64,15 +64,15 @@ export interface CreateCustomerProps {
   invite: boolean,
 };
 
-export const createCustomer = ({ customer }: {
+export const createCustomer = async ({ customer }: {
   customer: Customer
 }) => {
   console.log(`Customer ${JSON.stringify(customer, undefined, 2)}`);
-  return fetch(partnerApi(`customer`), {
+  return await fetch(partnerApi(`customer`), {
     method: 'POST',
     body: JSON.stringify(customer, undefined, 2),
     headers: {
-      'Authorization': `Basic ${encodedCredentials()}`,
+      Authorization: await authorizationHeader(),
       'Content-Type': 'application/json'
     }
   }).then(parseResponse);
