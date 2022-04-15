@@ -3,13 +3,15 @@ Prerequisites
 ===
 * [Docker](https://docs.docker.com/get-docker/)
 * [NodeJS](https://nodejs.org/en/download/)
+* [AWS CLI](https://aws.amazon.com/cli/)
 * [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/work-with.html)
 
 Installation
 ===
 1. Install and start Docker
 2. Install NodeJS
-3. Install the AWS CLI and AWS CDK ([AWS Docs](https://docs.aws.amazon.com/cdk/v2/guide/work-with.html))
+3. Install the [AWS CLI](https://aws.amazon.com/cli/)
+4. Install the [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/work-with.html)
 4. `npm run quickstart`
 
 Available Scripts
@@ -29,5 +31,5 @@ Deploy the React App
 Populate the API Key and Webhook Secret
 > `npm run aws:secrets:populate`
 
-## Taking it down
-1. `npm run destroy`
+Taking it down
+> `npm run destroy`

@@ -19,7 +19,7 @@ const { command } = require('../cli');
     tap(() => !silent && console.log('Running CDK Bootstrap')),
     switchMap(() => awsAppFolderCommand(`cdk bootstrap`)),
     tap(() => !silent && console.log('Running CDK Deploy')),
-    switchMap(() => awsAppFolderCommand(`cdk deploy --outputs-file ./cdk-outputs.json`)),
+    switchMap(() => awsAppFolderCommand(`cdk deploy --outputs-file ./cdk-outputs.json --require-approval never`)),
   ).subscribe({
     error: (error) => console.error(error),
     complete: () => !silent && console.log('AWS Deployment complete'),
