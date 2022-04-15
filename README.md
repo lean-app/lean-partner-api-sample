@@ -5,7 +5,7 @@
 * [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/work-with.html)
 ## Installation
 ### Quick Start
-1. Add you Lean API Key and Webhook Secret to `./aws-app/config.ts`
+1. Add your Lean API Key and Webhook Secret to `./aws-app/config.ts`
 2. `npm run quickstart`
 
 ### Step by Step
