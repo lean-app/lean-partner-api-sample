@@ -9,7 +9,7 @@ from(fs.readFile(path.join(__dirname, '../aws-app/cdk-outputs.json'))).pipe(
   map(({ AwsSampleStack }) => AwsSampleStack.ReactAppBucketName),
   switchMap((bucketName) => concat(
     command(`aws s3 rm s3://${bucketName.trim()} --recursive`),
-    command('cdk destroy', { 
+    command('cdk destroy -f', { 
       cwd: path.join(__dirname, '../aws-app'),
       verbose: true
     })
