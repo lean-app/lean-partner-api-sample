@@ -11,7 +11,7 @@
 ### Step by Step
 These steps allow you to execute each step of a deployment individually
 
-1. Add you Lean API Key and Webhook Secret to `./aws-app/config.ts`
+1. Add your Lean API Key and Webhook Secret to `./aws-app/config.ts`
 2. `npm run aws:deploy`
 3. `npm run react:generate:config`
 4. `npm react:build`
