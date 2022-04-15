@@ -9,7 +9,7 @@ Installation
 ===
 1. Install and start Docker
 2. Install NodeJS
-3. Install the AWS CLI and AWS CDK ([AWS Docs](https://docs.aws.amazon.com/cdk/v2/guide/work-with.html)
+3. Install the AWS CLI and AWS CDK ([AWS Docs](https://docs.aws.amazon.com/cdk/v2/guide/work-with.html))
 4. `npm run quickstart`
 
 Available Scripts
