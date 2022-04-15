@@ -73,7 +73,6 @@ export const tryCreateWorkerToInvite = () => WorkerStore.pipe(
 
 export const refresh = (worker: Worker) => of(worker).pipe(
   filter(({ invited, status }) => status !== 'NEW' || invited),
-  tap((worker) => console.log(worker)),
   tap(() => WorkerStore.update(
     updateEntities(worker.id, {
       refreshing: true
