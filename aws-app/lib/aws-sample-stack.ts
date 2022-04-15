@@ -357,6 +357,9 @@ export class AwsSampleStack extends Stack {
       new CfnOutput(this, 'LeanWebhookSecretId', {
         value: `${this.secrets.webhookSecret.secretFullArn}`
       }),
+      new CfnOutput(this, 'WebhookEndpoint', {
+        value: `${this.webhookApi.url}`,
+      }),
     ];
   }
 }

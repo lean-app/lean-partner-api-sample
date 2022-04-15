@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs/promises');
+const path = require('path');
 
 const { APIGatewayClient, GetApiKeyCommand } = require("@aws-sdk/client-api-gateway"); // CommonJS import
 
@@ -15,7 +16,7 @@ const getApiKey = async (apiKey) => {
 }
 
 (async () => {
-  const stackConfig = JSON.parse(await fs.readFile('./aws-app/cdk-outputs.json')).AwsSampleStack;
+  const stackConfig = JSON.parse(await fs.readFile(path.join(__dirname, '../aws-app/cdk-outputs.json'))).AwsSampleStack;
 
   console.info('Creating config file');
 

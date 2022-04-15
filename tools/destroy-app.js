@@ -12,7 +12,7 @@ const call = async (command) =>  (new Promise ((resolve, reject) => {
 }));
 
 (async () => {
-  const bucketName = await call(`grep -o '"ReactAppBucketName": "[^"]*' ./aws-app/cdk-outputs.json | grep -o '[^"]*$'`);
+  const bucketName = await call(`grep -o '"ReactAppBucketName": "[^"]*' ${path.join(__dirname, '../aws-app/cdk-outputs.json')} | grep -o '[^"]*$'`);
 
   await call(`aws s3 rm s3://${bucketName.trim()} --recursive`);
   await call(`cd ./aws-app && cdk destroy`);

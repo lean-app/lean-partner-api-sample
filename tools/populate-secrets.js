@@ -6,7 +6,7 @@ const { Temporal } = require('@js-temporal/polyfill');
 const { Observable, from, concat, zip } = require('rxjs');
 const { map, switchMap, tap, filter } = require('rxjs/operators');
 
-const { command } = require('../cli');
+const { command } = require('./cli');
 
 const { verbose = false, forceUpdate = false } = yargs.argv ?? {};
 
