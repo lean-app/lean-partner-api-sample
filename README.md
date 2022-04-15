@@ -12,6 +12,7 @@ This sample repository sets up barebones partner infrastructure to integrate wit
 3. Install the [AWS CLI](https://aws.amazon.com/cli/)
 4. Install the [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/work-with.html)
 5. `npm run quickstart`
+6. Navigate to the generated Cloufront URL
 
 > To complete integration you must create an API Key and set up your Webhook.
 > 

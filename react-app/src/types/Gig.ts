@@ -5,8 +5,8 @@ export interface Gig {
   totalAmount: number,
   type: string,
   description: string,
-  startTime: Date,
-  endTime: Date,
+  startTime: string,
+  endTime: string,
   tips: number,
   expenses: number
 };

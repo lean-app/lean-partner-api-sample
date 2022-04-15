@@ -9,11 +9,10 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import { toast } from 'react-toastify';
 
 import Lean, { CREATE_GIG, } from '../../services/lean.service';
+import { serveGig } from '../../services/worker.service';
 
-const submit = (gig: any) => Lean.perform({
-  type: CREATE_GIG,
-  params: gig
-}).then((result) => {
+const submit = (worker: any, gig: any) => serveGig(worker, gig)
+  .then((result) => {
   if (result.status !== 201) {
     throw new Error(result.data.message);
   }
@@ -61,7 +60,7 @@ export const ServeGigModal = ({ worker, closeModal }: { worker: any, closeModal:
   const [endTime, setEndTime] = useState(initialState.endTime);
 
   return (
-    <Form onSubmit={(e) => [e.preventDefault(), submit({
+    <Form onSubmit={(e) => [e.preventDefault(), serveGig(worker, {
       partnerUserId: worker.id,
 
       type,

@@ -3,7 +3,6 @@ const path = require('path');
 const { map, switchMap, from, tap, concat } = require('rxjs');
 const { command } = require('./cli');
 
-
 from(fs.readFile(path.join(__dirname, '../aws-app/cdk-outputs.json'))).pipe(
   map((data) => JSON.parse(data)),
   map(({ AwsSampleStack }) => AwsSampleStack.ReactAppBucketName),

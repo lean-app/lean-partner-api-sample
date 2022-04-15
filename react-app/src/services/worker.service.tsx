@@ -117,8 +117,8 @@ export const showServeGigModal = (worker: Worker) => WorkerStore.update(
 );
 
 export const serveGig = async (worker: Worker, gig: Gig) => {
-  if (worker.paymentMethod === 'lean') {
-    Lean.perform({
+  if (worker.paymentMethod.toLowerCase() === 'lean') {
+    const result = await Lean.perform({
       type: CREATE_GIG,
       params: {
         ...gig,
@@ -127,5 +127,12 @@ export const serveGig = async (worker: Worker, gig: Gig) => {
         gigId: ulid()
       }
     })
+    
+    if (result.status !== 201) {
+      console.error(result.data.message);
+      toast('result.data.message');
+    } else {
+      toast('Gig created!');
+    }
   }
 }
