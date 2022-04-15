@@ -3,7 +3,7 @@ import fetch, { Response } from 'node-fetch';
 import { Gig } from '../../types/gig.types';
 import { getSecret } from '../secretsmanager.service';
 
-const API_ENDPOINT = 'https://app.staging.withlean.com/api';
+const API_ENDPOINT = 'https://app.sandbox.withlean.com/api';
 const partnerApi = (path: string) => `${API_ENDPOINT}/${path}`;
 const authorizationHeader = async () => `Basic ${Buffer.from(`${await getSecret(process.env.LEAN_API_KEY_SECRET_ID)}:`).toString('base64')}`;
 

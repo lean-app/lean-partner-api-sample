@@ -95,7 +95,7 @@ export const WorkerTable = () => {
     return <>
         <Table header={{ cells: headerCellDefs }} rows={workerCells} />
         <Modal show={!!activeWorkerUi?.showModal} onHide={closeModal}>
-            {activeWorkerUi?.showModal === 'invite' && <InviteWorkerModal worker={({ ...activeWorker, email: `grant+${activeWorker?.id}@withlean.com` })} closeModal={closeModal}/>}
+            {activeWorkerUi?.showModal === 'invite' && <InviteWorkerModal worker={activeWorker} closeModal={closeModal}/>}
             {activeWorkerUi?.showModal === 'gig' && <ServeGigModal worker={activeWorker} closeModal={closeModal} />}
         </Modal>
     </>;
