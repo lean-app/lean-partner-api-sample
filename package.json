@@ -10,7 +10,6 @@
     "aws:deploy": "node ./tools/deploy/aws.js",
     "aws:secrets:populate": "node ./tools/populate-secrets.js",
     "display:domains": "node ./tools/display/domains.js",
-    "display:webhook:instructions": "node ./tools/display/webhook-instructions.js",
     "react:build": "node ./tools/build/react.js",
     "react:deploy": "node ./tools/deploy/react.js",
     "react:config:generate": "node ./tools/generate-config.js"

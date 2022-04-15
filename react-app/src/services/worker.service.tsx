@@ -74,7 +74,6 @@ export const tryCreateWorkerToInvite = () => WorkerStore.pipe(
   tap(({ id }) => WorkerStore.update(updateEntities(id, (entity) => ({
     ...entity,
     name: `${names[Math.floor(Math.random() * names.length)]} ${names[Math.floor((1 - Math.random()) * names.length)]}`,
-    email: `grant+${id}@withlean.com`
   }))))
 ).subscribe();
 

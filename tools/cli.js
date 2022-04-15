@@ -1,3 +1,4 @@
+const readline = require('readline');
 const { spawn } = require('child_process');
 const { Observable } = require('rxjs');
 const { tap, reduce } = require('rxjs/operators');
@@ -32,6 +33,19 @@ const command = (input, options = { silent: false, verbose: false }) =>  {
   );
 };
 
+const prompt = (question) => new Observable((observer) => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  rl.question(question, (answer) => {
+    rl.close();
+    observer.next(answer);
+    observer.complete();
+  });
+});
+
 module.exports = {
-  command
+  command, prompt
 };
