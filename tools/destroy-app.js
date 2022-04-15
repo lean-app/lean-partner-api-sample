@@ -1,19 +1,21 @@
-const { exec } = require('child_process');
+const fs = require('fs/promises')
+const path = require('path');
+const { map, switchMap, from, tap, concat } = require('rxjs');
+const { command } = require('./cli');
 
-const call = async (command) =>  (new Promise ((resolve, reject) => {
-  exec(command, (error, stdout, stderr) => {
-    if (error || stderr) {
-      console.error(error || stderr);
-      return reject(error || stderr);
-    }
 
-    resolve(stdout.trim());
-  })
-}));
-
-(async () => {
-  const bucketName = await call(`grep -o '"ReactAppBucketName": "[^"]*' ${path.join(__dirname, '../aws-app/cdk-outputs.json')} | grep -o '[^"]*$'`);
-
-  await call(`aws s3 rm s3://${bucketName.trim()} --recursive`);
-  await call(`cd ./aws-app && cdk destroy`);
-})();
+from(fs.readFile(path.join(__dirname, '../aws-app/cdk-outputs.json'))).pipe(
+  map((data) => JSON.parse(data)),
+  map(({ AwsSampleStack }) => AwsSampleStack.ReactAppBucketName),
+  switchMap((bucketName) => concat(
+    command(`aws s3 rm s3://${bucketName.trim()} --recursive`),
+    command('cdk destroy', { 
+      cwd: path.join(__dirname, '../aws-app'),
+      verbose: true
+    })
+  ))
+).subscribe({
+  next: (value) => console.log(value),
+  error: (value) => console.error(value),
+  complete: () => console.log('Destroy complete'),
+});
