@@ -9,7 +9,7 @@ const { tap, map, switchMap } = require('rxjs/operators');
 const { command } = require('../cli');
 const { verbose = false, silent = false } = require('yargs').argv;
 
-from(fs.readFile('./aws-app/cdk-outputs.json', {
+from(fs.readFile(path.join(__dirname, '../../aws-app/cdk-outputs.json'), {
   encoding: 'utf8',
 })).pipe(
   map((data) => JSON.parse(data).AwsSampleStack),
