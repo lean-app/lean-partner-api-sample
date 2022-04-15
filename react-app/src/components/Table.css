@@ -9,3 +9,7 @@
     display: flex;
     justify-content: flex-end;
 }
+
+.worker-table-item-actions button {
+    margin-right:  10px;
+}
