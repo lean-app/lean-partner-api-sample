@@ -117,22 +117,25 @@ export const showServeGigModal = (worker: Worker) => WorkerStore.update(
 );
 
 export const serveGig = async (worker: Worker, gig: Gig) => {
-  if (worker.paymentMethod.toLowerCase() === 'lean') {
-    const result = await Lean.perform({
-      type: CREATE_GIG,
-      params: {
-        ...gig,
+  if (worker.paymentMethod.toLowerCase() !== 'lean') {
+    toast('Gig created!');
+    return;
+  }
 
-        partnerUserId: worker.id,
-        gigId: ulid()
-      }
-    })
-    
-    if (result.status !== 201) {
-      console.error(result.data.message);
-      toast('result.data.message');
-    } else {
-      toast('Gig created!');
+  const result = await Lean.perform({
+    type: CREATE_GIG,
+    params: {
+      ...gig,
+
+      partnerUserId: worker.id,
+      gigId: ulid()
     }
+  })
+  
+  if (result.status !== 201) {
+    console.error(result.data.message);
+    toast('Failed to create gig.');
+  } else {
+    toast('Gig created!');
   }
 }

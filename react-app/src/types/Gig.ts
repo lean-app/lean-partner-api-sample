@@ -2,11 +2,11 @@ export interface Gig {
   partnerUserId: string,
   gigId: string,
   
-  totalAmount: number,
+  totalAmount: string,
   type: string,
   description: string,
   startTime: string,
   endTime: string,
-  tips: number,
-  expenses: number
+  tips: string,
+  expenses: string
 };

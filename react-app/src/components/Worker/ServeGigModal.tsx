@@ -7,23 +7,9 @@ import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { toast } from 'react-toastify';
+import { ulid } from 'ulid';
 
-import Lean, { CREATE_GIG, } from '../../services/lean.service';
 import { serveGig } from '../../services/worker.service';
-
-const submit = (worker: any, gig: any) => serveGig(worker, gig)
-  .then((result) => {
-  if (result.status !== 201) {
-    throw new Error(result.data.message);
-  }
- 
-  // Update GigStore
-  
-  toast('Gig created!');
-}).catch((error) => {
-  console.error(error)
-  toast(error.message);
-});
 
 const initialState = {
   type: 'Space Rideshare Gig',
@@ -62,6 +48,7 @@ export const ServeGigModal = ({ worker, closeModal }: { worker: any, closeModal:
   return (
     <Form onSubmit={(e) => [e.preventDefault(), serveGig(worker, {
       partnerUserId: worker.id,
+      gigId: ulid(),
 
       type,
       description,
